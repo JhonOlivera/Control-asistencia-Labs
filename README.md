@@ -2,12 +2,6 @@
  
 Sistema web para el registro y seguimiento de asistencia a prácticas de laboratorio en la Universidad de Ibagué, pensado como reemplazo de las listas físicas y planillas de Excel que se usan actualmente.
  
-![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
-![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
- 
 ---
  
 ## 🧭 Descripción del proyecto
@@ -30,6 +24,8 @@ Actualmente, el control de asistencia a las prácticas de laboratorio se hace de
 - 🔔 Notificaciones automáticas para coordinación académica
 - 🧾 Trazabilidad completa: toda edición queda auditada (usuario, fecha, valor anterior y nuevo)
 ## 🏗️ Stack tecnológico
+ 
+![Stack](https://skillicons.dev/icons?i=java,spring,angular,ts,mysql,git,github&theme=dark)
  
 | Componente | Tecnología |
 |---|---|
@@ -59,11 +55,11 @@ El proyecto sigue los lineamientos de calidad de software definidos en la norma 
  
 Consulta la [Wiki del repositorio](../../wiki) para ver el detalle completo del Avance 1, las historias de usuario y los diagramas del proyecto.
  
-## 👤 Autor
+## 👥 Equipo
  
-**Jhon Edwin Olivera Duarte,**
-**Sebastian Rodriguez Martinez,**
-**Juan Andres Bejarano Garzón**
+- **Jhon Edwin Olivera Duarte**
+- **Sebastian Rodriguez Martinez**
+- **Juan Andres Bejarano Garzon**
 Estudiantes de Ingeniería de Sistemas — Universidad de Ibagué
  
 ---
