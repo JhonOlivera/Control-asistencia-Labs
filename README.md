@@ -61,8 +61,8 @@ Consulta la [Wiki del repositorio](../../wiki) para ver el detalle completo del 
  
 ## 👤 Autor
  
-**Jhon Edwin Olivera Duarte**,
-**Sebastian Rodriguez Martinez**,
+**Jhon Edwin Olivera Duarte,**
+**Sebastian Rodriguez Martinez,**
 **Juan Andres Bejarano Garzón**
 Estudiante de Ingeniería de Sistemas — Universidad de Ibagué
  
