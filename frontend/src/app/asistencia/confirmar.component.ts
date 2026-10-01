@@ -1,15 +1,16 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { timeout } from 'rxjs';
 import { apiUrl } from '../core/environment';
 
 @Component({
   selector: 'app-confirmar',
   template: `
     <main class="confirmation" aria-live="polite">
-      @if (status === 'loading') {
+      @if (status() === 'loading') {
         <p class="message">Verificando asistencia...</p>
-      } @else if (status === 'success') {
+      } @else if (status() === 'success') {
         <h1 class="message success">Asistencia registrada</h1>
       } @else {
         <h1 class="message failure">No se pudo registrar, el enlace puede haber expirado</h1>
@@ -28,22 +29,23 @@ export class ConfirmarComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly http = inject(HttpClient);
 
-  status: 'loading' | 'success' | 'error' = 'loading';
+  status = signal<'loading' | 'success' | 'error'>('loading');
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
       const token = params.get('token');
       if (!token) {
-        this.status = 'error';
+        this.status.set('error');
         return;
       }
 
-      this.status = 'loading';
+      this.status.set('loading');
       this.http
         .get(`${apiUrl}/asistencia/marcar?token=${encodeURIComponent(token)}`)
+        .pipe(timeout(10_000))
         .subscribe({
-          next: () => (this.status = 'success'),
-          error: () => (this.status = 'error'),
+          next: () => this.status.set('success'),
+          error: () => this.status.set('error'),
         });
     });
   }
