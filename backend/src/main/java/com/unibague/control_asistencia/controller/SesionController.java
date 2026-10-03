@@ -2,6 +2,7 @@ package com.unibague.control_asistencia.controller;
 
 import com.unibague.control_asistencia.dto.SesionRequestDto;
 import com.unibague.control_asistencia.dto.SesionResponseDto;
+import com.unibague.control_asistencia.service.NotificacionService;
 import com.unibague.control_asistencia.service.SesionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -18,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class SesionController {
 
     private final SesionService sesionService;
+    private final NotificacionService notificacionService;
 
-    public SesionController(SesionService sesionService) {
+    public SesionController(SesionService sesionService, NotificacionService notificacionService) {
         this.sesionService = sesionService;
+        this.notificacionService = notificacionService;
     }
 
     @PostMapping
@@ -33,5 +36,11 @@ public class SesionController {
     public ResponseEntity<SesionResponseDto> cerrarSesion(@PathVariable Long id) {
         SesionResponseDto response = sesionService.cerrarSesion(id);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/enviar-enlaces")
+    public ResponseEntity<Void> enviarEnlaces(@PathVariable Long id) {
+        notificacionService.enviarEnlacesDeSesion(id);
+        return ResponseEntity.ok().build();
     }
 }
