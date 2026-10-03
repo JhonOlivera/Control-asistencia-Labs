@@ -9,6 +9,7 @@ import com.unibague.control_asistencia.repository.AdministradorRepository;
 import com.unibague.control_asistencia.repository.CursoRepository;
 import com.unibague.control_asistencia.repository.EstudianteRepository;
 import com.unibague.control_asistencia.repository.LaboratorioRepository;
+import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class DataSeeder implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSeeder.class);
-    private static final String CORREO_ADMINISTRADOR_GOOGLE = "jhonedwinolivera2018@gmail.com";
+    private static final List<AdministradorGoogle> ADMINISTRADORES_GOOGLE = List.of(
+            new AdministradorGoogle("Jhon Edwin Olivera Duarte", "jhonedwinolivera2018@gmail.com"),
+            new AdministradorGoogle("Juan Andrés Bejarano", "juanbejaranog09@gmail.com"),
+            new AdministradorGoogle("Sebastián Rodríguez", "megalobastian12@gmail.com")
+    );
+
+    private record AdministradorGoogle(String nombre, String correo) {
+    }
 
     private final AdministradorRepository administradorRepository;
     private final EstudianteRepository estudianteRepository;
@@ -54,23 +62,25 @@ public class DataSeeder implements CommandLineRunner {
                 .or(() -> administradorRepository.findByNombre("Administrador de prueba"))
                 .orElseGet(this::crearAdministrador);
 
-        Administrador administradorGoogle = administradorRepository.findByCorreo(CORREO_ADMINISTRADOR_GOOGLE)
-                .orElseGet(this::crearAdministradorGoogle);
-
         if (curso.getEstudiantes().add(estudiante)) {
             cursoRepository.save(curso);
         }
 
         logger.info("Datos de prueba disponibles: cursoId={}, laboratorioId={}, administradorId={}, estudianteId={}",
                 curso.getId(), laboratorio.getId(), administrador.getId(), estudiante.getId());
-        logger.info("Administrador con acceso por Google: {} (id={})",
-                administradorGoogle.getCorreo(), administradorGoogle.getId());
+
+        for (AdministradorGoogle datos : ADMINISTRADORES_GOOGLE) {
+            Administrador administradorGoogle = administradorRepository.findByCorreo(datos.correo())
+                    .orElseGet(() -> crearAdministradorGoogle(datos));
+            logger.info("Administrador con acceso por Google: {} (id={})",
+                    administradorGoogle.getCorreo(), administradorGoogle.getId());
+        }
     }
 
-    private Administrador crearAdministradorGoogle() {
+    private Administrador crearAdministradorGoogle(AdministradorGoogle datos) {
         Administrador administrador = new Administrador();
-        administrador.setNombre("Jhon Edwin Olivera Duarte");
-        administrador.setCorreo(CORREO_ADMINISTRADOR_GOOGLE);
+        administrador.setNombre(datos.nombre());
+        administrador.setCorreo(datos.correo());
         return administradorRepository.save(administrador);
     }
 
