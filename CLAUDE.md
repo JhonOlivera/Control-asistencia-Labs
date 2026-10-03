@@ -27,6 +27,17 @@ El dominio, los identificadores del código, los mensajes de commit y los textos
 - **Nunca** escribir credenciales reales (contraseñas, hosts, usuarios, tokens) en ningún archivo del repositorio; usar variables de entorno.
 - Los commits siguen Conventional Commits en español (`feat: ...`, `fix: ...`, `chore: ...`) y suelen referenciar la historia de usuario (`HU01`).
 
+### No modificar sin avisar al equipo
+Estos archivos afectan a todos. Cualquier cambio se discute antes y se explica en el Pull Request:
+- `backend/src/main/java/.../config/SecurityConfig.java`
+- `backend/src/main/java/.../config/CorsConfig.java`
+- `backend/src/main/resources/application.properties`
+- `backend/pom.xml`
+- `backend/src/main/java/.../service/DataSeeder.java`
+- **Las entidades** en `model/`: renombrar, borrar o cambiar el tipo de un campo, y también **agregar campos nuevos**. Hibernate (`ddl-auto=update`) altera la base compartida de Aiven en cuanto alguien arranca el backend.
+
+`.github/copilot-instructions.md` resume este archivo para GitHub Copilot; si cambian estas reglas, actualizar ambos.
+
 Es un monorepo con dos aplicaciones independientes:
 - `backend/`: Spring Boot 4.1 (Java 25, Maven wrapper, Lombok), MySQL en Aiven.
 - `frontend/`: Angular 22 (componentes standalone, signals, Vitest).
@@ -66,7 +77,7 @@ Por capas: `controller` → `service` → `repository` (Spring Data JPA) → `mo
 - **El esquema lo administra Hibernate** (`ddl-auto=update`): no hay migraciones, y cambiar una entidad altera directamente la base de datos compartida en Aiven.
 - **Jerarquía de usuarios**: `Usuario` es la base (herencia `JOINED`) de `Administrador`, `Docente`, `Estudiante` y `Coordinador`. El correo es único en toda la tabla `usuarios`.
 - **Manejo de errores**: los servicios lanzan `ResourceNotFoundException` (→ 404) o excepciones de validación de dominio `ValidacionSesionException` / `ValidacionAsistenciaException` (→ 400); `GlobalExceptionHandler` las convierte en `ErrorResponse { message }`. Las nuevas reglas de negocio deben seguir este patrón en lugar de armar respuestas de error en los controladores.
-- **`DataSeeder`** (`CommandLineRunner`) crea de forma idempotente un estudiante, laboratorio, curso y administrador de prueba, y el administrador `jhonedwinolivera2018@gmail.com` para entrar con Google, en cada arranque; registra sus IDs en el log.
+- **`DataSeeder`** (`CommandLineRunner`) crea de forma idempotente un estudiante, laboratorio, curso y administrador de prueba, y los administradores del equipo que entran con Google (lista `ADMINISTRADORES_GOOGLE`), en cada arranque; registra sus IDs en el log.
 - Parámetros en `application.properties`: `app.frontend-url`, `app.token.expiracion-minutos`, `app.asistencia.minutos-tolerancia`, `app.jwt.expiracion-horas`.
 - CORS (`config/CorsConfig`) es un bean `CorsConfigurationSource` que aplica Spring Security; solo permite `http://localhost:4200` sobre `/api/**`, así que hay que actualizarlo al desplegar.
 
