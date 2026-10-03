@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DataSeeder implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSeeder.class);
+    private static final String CORREO_ADMINISTRADOR_GOOGLE = "jhonedwinolivera2018@gmail.com";
 
     private final AdministradorRepository administradorRepository;
     private final EstudianteRepository estudianteRepository;
@@ -53,12 +54,24 @@ public class DataSeeder implements CommandLineRunner {
                 .or(() -> administradorRepository.findByNombre("Administrador de prueba"))
                 .orElseGet(this::crearAdministrador);
 
+        Administrador administradorGoogle = administradorRepository.findByCorreo(CORREO_ADMINISTRADOR_GOOGLE)
+                .orElseGet(this::crearAdministradorGoogle);
+
         if (curso.getEstudiantes().add(estudiante)) {
             cursoRepository.save(curso);
         }
 
         logger.info("Datos de prueba disponibles: cursoId={}, laboratorioId={}, administradorId={}, estudianteId={}",
                 curso.getId(), laboratorio.getId(), administrador.getId(), estudiante.getId());
+        logger.info("Administrador con acceso por Google: {} (id={})",
+                administradorGoogle.getCorreo(), administradorGoogle.getId());
+    }
+
+    private Administrador crearAdministradorGoogle() {
+        Administrador administrador = new Administrador();
+        administrador.setNombre("Jhon Edwin Olivera Duarte");
+        administrador.setCorreo(CORREO_ADMINISTRADOR_GOOGLE);
+        return administradorRepository.save(administrador);
     }
 
     private Estudiante crearEstudiante() {
