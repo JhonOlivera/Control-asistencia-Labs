@@ -141,3 +141,11 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# IDEs
+.idea/
+*.iml
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
