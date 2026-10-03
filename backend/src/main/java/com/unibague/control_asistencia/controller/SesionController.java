@@ -1,12 +1,16 @@
 package com.unibague.control_asistencia.controller;
 
+import com.unibague.control_asistencia.dto.AsistenciaEstudianteDto;
 import com.unibague.control_asistencia.dto.SesionRequestDto;
 import com.unibague.control_asistencia.dto.SesionResponseDto;
+import com.unibague.control_asistencia.dto.SesionResumenDto;
 import com.unibague.control_asistencia.service.NotificacionService;
 import com.unibague.control_asistencia.service.SesionService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +28,16 @@ public class SesionController {
     public SesionController(SesionService sesionService, NotificacionService notificacionService) {
         this.sesionService = sesionService;
         this.notificacionService = notificacionService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SesionResumenDto>> listarSesiones() {
+        return ResponseEntity.ok(sesionService.listarSesiones());
+    }
+
+    @GetMapping("/{id}/asistencias")
+    public ResponseEntity<List<AsistenciaEstudianteDto>> listarAsistencias(@PathVariable Long id) {
+        return ResponseEntity.ok(sesionService.listarAsistencias(id));
     }
 
     @PostMapping
