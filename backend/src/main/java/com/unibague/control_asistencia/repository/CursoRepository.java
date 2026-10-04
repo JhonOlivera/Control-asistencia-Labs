@@ -17,6 +17,8 @@ public interface CursoRepository extends JpaRepository<Curso, Long> {
             """)
     List<Matricula> findMatriculasDeEstudiantesActivos();
 
+    List<Curso> findAllByOrderByNombreAscGrupoAsc();
+
     interface Matricula {
         Long getCursoId();
         String getCursoNombre();

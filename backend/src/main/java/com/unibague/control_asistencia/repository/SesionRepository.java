@@ -5,6 +5,7 @@ import com.unibague.control_asistencia.model.enums.EstadoSesion;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,6 +24,9 @@ public interface SesionRepository extends JpaRepository<Sesion, Long> {
             """)
     List<Sesion> findByEstadoEnCursosDelEstudiante(@Param("estado") EstadoSesion estado,
                                                    @Param("estudianteId") Long estudianteId);
+
+    @EntityGraph(attributePaths = {"curso", "laboratorio"})
+    List<Sesion> findAllByOrderByFechaDescHoraDescIdDesc();
 
     interface ConteoPorCurso {
         Long getCursoId();
