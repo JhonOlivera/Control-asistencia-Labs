@@ -1,9 +1,11 @@
 package com.unibague.control_asistencia.service;
 
 import com.unibague.control_asistencia.exception.ResourceNotFoundException;
+import com.unibague.control_asistencia.exception.ValidacionSesionException;
 import com.unibague.control_asistencia.model.Estudiante;
 import com.unibague.control_asistencia.model.Sesion;
 import com.unibague.control_asistencia.model.TokenAsistencia;
+import com.unibague.control_asistencia.model.enums.EstadoSesion;
 import com.unibague.control_asistencia.repository.EstudianteRepository;
 import com.unibague.control_asistencia.repository.SesionRepository;
 import com.unibague.control_asistencia.repository.TokenAsistenciaRepository;
@@ -53,6 +55,9 @@ public class NotificacionService {
     public void enviarEnlacesDeSesion(Long sesionId) {
         Sesion sesion = sesionRepository.findById(sesionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Sesión no encontrada con id " + sesionId));
+        if (sesion.getEstado() != EstadoSesion.ABIERTA) {
+            throw new ValidacionSesionException("No se pueden enviar enlaces porque la sesión no está ABIERTA.");
+        }
         var estudiantes = estudianteRepository.findActivosByCursoId(sesion.getCurso().getId());
         LocalDateTime fechaHoraSesion = LocalDateTime.of(sesion.getFecha(), sesion.getHora());
 
