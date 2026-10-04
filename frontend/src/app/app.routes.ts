@@ -14,7 +14,43 @@ export const routes: Routes = [
 	{
 		path: 'panel',
 		canActivate: [authGuard],
-		loadComponent: () => import('./panel/panel.component').then((module) => module.PanelComponent),
+		loadComponent: () =>
+			import('./layout/panel-layout.component').then((module) => module.PanelLayoutComponent),
+		children: [
+			{
+				path: '',
+				loadComponent: () =>
+					import('./panel/inicio.component').then((module) => module.InicioComponent),
+			},
+			{
+				path: 'sesiones',
+				loadComponent: () =>
+					import('./layout/en-construccion.component').then(
+						(module) => module.EnConstruccionComponent,
+					),
+			},
+			{
+				path: 'laboratorios',
+				loadComponent: () =>
+					import('./layout/en-construccion.component').then(
+						(module) => module.EnConstruccionComponent,
+					),
+			},
+			{
+				path: 'estudiantes',
+				loadComponent: () =>
+					import('./layout/en-construccion.component').then(
+						(module) => module.EnConstruccionComponent,
+					),
+			},
+			{
+				path: 'dashboard',
+				loadComponent: () =>
+					import('./layout/en-construccion.component').then(
+						(module) => module.EnConstruccionComponent,
+					),
+			},
+		],
 	},
 	{
 		path: 'asistencia/confirmar',
