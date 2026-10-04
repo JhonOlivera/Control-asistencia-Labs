@@ -16,9 +16,19 @@ import { AuthService, UsuarioAutenticado } from '../core/auth.service';
     </section>
   `,
   styles: `
-    .inicio { display: grid; gap: 8px; }
-    h1 { margin: 0; font-size: 26px; color: var(--color-texto); }
-    p { margin: 0; color: var(--color-texto-suave); }
+    .inicio {
+      display: grid;
+      gap: 8px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      color: var(--color-texto);
+    }
+    p {
+      margin: 0;
+      color: var(--color-texto-suave);
+    }
   `,
 })
 export class InicioComponent implements OnInit {

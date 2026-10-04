@@ -74,8 +74,8 @@ public class GoogleLoginSuccessHandler implements AuthenticationSuccessHandler {
             return Optional.empty();
         }
         return administradorRepository.findByCorreo(correo)
-                .map(admin -> new UsuarioAutenticadoDto(admin.getCorreo(), admin.getNombre(), Rol.ADMINISTRADOR.name()))
+                .map(admin -> new UsuarioAutenticadoDto(admin.getId(), admin.getCorreo(), admin.getNombre(), Rol.ADMINISTRADOR.name()))
                 .or(() -> docenteRepository.findByCorreo(correo)
-                        .map(docente -> new UsuarioAutenticadoDto(docente.getCorreo(), docente.getNombre(), Rol.DOCENTE.name())));
+                        .map(docente -> new UsuarioAutenticadoDto(docente.getId(), docente.getCorreo(), docente.getNombre(), Rol.DOCENTE.name())));
     }
 }
