@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock-ups — Control de Asistencia en Laboratorios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2430;
+    --ink-soft:#5B6470;
+    --paper:#EFEDE6;
+    --paper-raised:#F7F6F2;
+    --line:#D9D5C9;
+    --teal:#2B6E63;
+    --teal-soft:#E4EEEB;
+    --ok:#3F8F5F;
+    --ok-soft:#E3F0E7;
+    --warn:#C98A2C;
+    --warn-soft:#F5EADA;
+    --bad:#B8463F;
+    --bad-soft:#F5E4E2;
+    --radius-s:3px;
+    --radius-m:6px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  /* ---------- Shell ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns:232px 1fr;
+    min-height:100vh;
+  }
+  .sidebar{
+    background:var(--ink);
+    color:#D7DCE2;
+    padding:28px 0;
+    display:flex;
+    flex-direction:column;
+  }
+  .sidebar-brand{
+    padding:0 24px 24px 24px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    margin-bottom:8px;
+  }
+  .sidebar-brand .tag{
+    font-size:11px;
+    color:#8B95A3;
+    margin-bottom:4px;
+  }
+  .sidebar-brand h1{
+    font-size:19px;
+    color:#F2F1EC;
+    line-height:1.25;
+  }
+  .nav-list{
+    list-style:none;
+    margin:16px 0 0 0;
+    padding:0;
+  }
+  .nav-item{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    padding:12px 24px;
+    cursor:pointer;
+    border-left:3px solid transparent;
+    font-size:14.5px;
+    color:#B7BFC8;
+    transition:background 0.12s ease, color 0.12s ease;
+  }
+  .nav-item .idx{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:#6C7684;
+    min-width:14px;
+  }
+  .nav-item:hover{ background:rgba(255,255,255,0.04); color:#EDEFF1; }
+  .nav-item.active{
+    background:rgba(255,255,255,0.06);
+    border-left-color:var(--ok);
+    color:#F5F4EF;
+  }
+  .nav-item.active .idx{ color:var(--ok); }
+  .sidebar-foot{
+    margin-top:auto;
+    padding:16px 24px 0 24px;
+    border-top:1px solid rgba(255,255,255,0.1);
+    font-size:11.5px;
+    color:#6C7684;
+    line-height:1.5;
+  }
+
+  .main{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+  }
+  .topbar{
+    padding:22px 40px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    background:var(--paper-raised);
+  }
+  .topbar .crumb{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .topbar h2{ font-size:24px; }
+  .topbar .persona{
+    text-align:right;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .topbar .persona strong{ color:var(--ink); display:block; font-size:14px; font-weight:500;}
+
+  .screen{
+    display:none;
+    padding:36px 40px 60px 40px;
+    max-width:920px;
+  }
+  .screen.active{ display:block; animation:reveal 0.28s ease; }
+  @keyframes reveal{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){ .screen.active{animation:none;} }
+
+  .card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:var(--radius-m);
+    padding:28px;
+  }
+
+  /* ---------- form basics ---------- */
+  label{
+    display:block;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  input[type=text], input[type=password], select{
+    width:100%;
+    font-family:inherit;
+    font-size:14.5px;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:var(--radius-s);
+    background:#fff;
+    color:var(--ink);
+  }
+  input:focus, select:focus, button:focus-visible, .nav-item:focus-visible{
+    outline:2px solid var(--teal);
+    outline-offset:2px;
+  }
+  .field{ margin-bottom:18px; }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+  button{
+    font-family:inherit;
+    cursor:pointer;
+    border:none;
+  }
+  .btn-primary{
+    background:var(--teal);
+    color:#fff;
+    padding:11px 22px;
+    border-radius:var(--radius-s);
+    font-size:14.5px;
+    font-weight:500;
+  }
+  .btn-primary:hover{ background:#245A51; }
+  .btn-secondary{
+    background:transparent;
+    color:var(--ink);
+    border:1px solid var(--line);
+    padding:10px 20px;
+    border-radius:var(--radius-s);
+    font-size:14.5px;
+  }
+  .btn-secondary:hover{ border-color:var(--ink-soft); }
+
+  /* ---------- Login screen ---------- */
+  .login-wrap{ display:flex; justify-content:center; padding-top:24px; }
+  .login-card{ width:360px; }
+  .login-mark{
+    width:40px; height:40px; border-radius:50%;
+    background:var(--teal); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif; font-size:18px;
+    margin-bottom:18px;
+  }
+  .login-card h2{ font-size:20px; margin-bottom:4px; }
+  .login-sub{ font-size:13px; color:var(--ink-soft); margin-bottom:24px; }
+  .login-help{ margin-top:18px; font-size:12.5px; color:var(--ink-soft); text-align:center; }
+  .btn-google{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius-s);
+    padding:10px 16px;
+    font-size:14px;
+    font-weight:500;
+    color:var(--ink);
+  }
+  .btn-google:hover{ border-color:var(--ink-soft); background:var(--paper); }
+  .login-divider{
+    display:flex; align-items:center; gap:10px;
+    margin:18px 0;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .login-divider::before, .login-divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  /* ---------- Selection screen ---------- */
+  .lab-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:28px; }
+  .lab-option{
+    border:1px solid var(--line);
+    border-radius:var(--radius-m);
+    padding:16px 18px;
+    background:var(--paper-raised);
+    cursor:pointer;
+  }
+  .lab-option.selected{ border-color:var(--teal); background:var(--teal-soft); }
+  .lab-option .lab-name{ font-weight:500; font-size:15px; margin-bottom:3px; }
+  .lab-option .lab-meta{ font-size:12.5px; color:var(--ink-soft); }
+
+  .session-list{ border:1px solid var(--line); border-radius:var(--radius-m); overflow:hidden; }
+  .session-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 18px;
+    border-bottom:1px solid var(--line);
+    background:var(--paper-raised);
+  }
+  .session-row:last-child{ border-bottom:none; }
+  .session-row.disabled{ opacity:0.5; }
+  .session-time{ font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--ink-soft); width:110px; }
+  .session-info strong{ font-size:14.5px; font-weight:500; }
+  .session-info div{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+  .pill{
+    font-size:11px;
+    padding:3px 9px;
+    border-radius:20px;
+    font-weight:500;
+  }
+  .pill-live{ background:var(--ok-soft); color:var(--ok); }
+  .pill-soon{ background:var(--warn-soft); color:var(--warn); }
+
+  /* ---------- Attendance screen ---------- */
+  .att-header{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:18px;
+  }
+  .att-header .count{ font-size:13px; color:var(--ink-soft); }
+  .roster{ border:1px solid var(--line); border-radius:var(--radius-m); overflow:hidden; }
+  .roster-row{
+    display:grid;
+    grid-template-columns:32px 1fr auto;
+    align-items:center;
+    gap:16px;
+    padding:13px 18px;
+    background:var(--paper-raised);
+    border-bottom:1px solid var(--line);
+  }
+  .roster-row:last-child{ border-bottom:none; }
+  .avatar{
+    width:32px; height:32px; border-radius:50%;
+    background:var(--paper);
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; color:var(--ink-soft); font-weight:500;
+  }
+  .stu-name{ font-size:14.5px; font-weight:500; }
+  .stu-code{ font-size:12px; color:var(--ink-soft); font-family:'IBM Plex Mono', monospace; }
+  .status-group{ display:flex; gap:6px; }
+  .status-btn{
+    font-size:12.5px;
+    padding:7px 13px;
+    border-radius:var(--radius-s);
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+  }
+  .status-btn.p.on{ background:var(--ok-soft); border-color:var(--ok); color:var(--ok); }
+  .status-btn.t.on{ background:var(--warn-soft); border-color:var(--warn); color:var(--warn); }
+  .status-btn.a.on{ background:var(--bad-soft); border-color:var(--bad); color:var(--bad); }
+  .status-time{ font-size:11px; color:var(--ink-soft); margin-top:5px; text-align:right; font-family:'IBM Plex Mono', monospace; }
+  .att-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
+  .scan-bar{
+    display:flex; align-items:center; gap:14px;
+    background:var(--teal-soft);
+    border:1px solid var(--teal);
+    border-radius:var(--radius-m);
+    padding:12px 16px;
+    margin-bottom:18px;
+  }
+  .scan-bar svg{ flex-shrink:0; color:var(--teal); }
+  .scan-bar input{
+    flex:1;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    padding:9px 12px;
+    border:1px solid var(--teal);
+    border-radius:var(--radius-s);
+    background:#fff;
+    color:var(--ink);
+  }
+  .scan-hint{ font-size:11.5px; color:var(--ink-soft); white-space:nowrap; }
+  .roster-row.just-scanned{ background:var(--ok-soft); transition:background 1.2s ease; }
+
+  /* ---------- History screen ---------- */
+  .history-top{ display:flex; gap:28px; margin-bottom:28px; align-items:center; }
+  .ring{ position:relative; width:96px; height:96px; flex-shrink:0; }
+  .ring svg{ transform:rotate(-90deg); }
+  .ring-label{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column;
+  }
+  .ring-label strong{ font-size:20px; font-family:'Fraunces', serif; font-weight:500; }
+  .ring-label span{ font-size:10px; color:var(--ink-soft); }
+  .history-summary h3{ font-size:16px; margin-bottom:6px; }
+  .history-summary p{ font-size:13px; color:var(--ink-soft); margin:0; max-width:400px; line-height:1.5; }
+
+  .hist-list{ border:1px solid var(--line); border-radius:var(--radius-m); overflow:hidden; }
+  .hist-row{
+    display:grid; grid-template-columns:120px 1fr auto;
+    align-items:center; gap:16px;
+    padding:13px 18px;
+    background:var(--paper-raised);
+    border-bottom:1px solid var(--line);
+    font-size:13.5px;
+  }
+  .hist-row:last-child{ border-bottom:none; }
+  .hist-date{ font-family:'IBM Plex Mono', monospace; color:var(--ink-soft); font-size:12.5px; }
+  .badge{ font-size:11.5px; padding:4px 10px; border-radius:20px; font-weight:500; }
+  .badge.ok{ background:var(--ok-soft); color:var(--ok); }
+  .badge.warn{ background:var(--warn-soft); color:var(--warn); }
+  .badge.bad{ background:var(--bad-soft); color:var(--bad); }
+
+  /* ---------- Reports screen ---------- */
+  .filters{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:22px; }
+  .report-preview{ border:1px solid var(--line); border-radius:var(--radius-m); overflow:hidden; margin-bottom:20px; }
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  thead th{
+    text-align:left; font-size:11.5px; color:var(--ink-soft); font-weight:500;
+    padding:11px 16px; background:var(--paper); border-bottom:1px solid var(--line);
+  }
+  tbody td{ padding:11px 16px; border-bottom:1px solid var(--line); background:var(--paper-raised); }
+  tbody tr:last-child td{ border-bottom:none; }
+  .bar-cell{ display:flex; align-items:center; gap:8px; }
+  .bar-track{ width:70px; height:6px; background:var(--line); border-radius:3px; overflow:hidden; }
+  .bar-fill{ height:100%; background:var(--teal); }
+  .export-row{ display:flex; gap:10px; justify-content:flex-end; }
+
+  .note{
+    margin-top:26px;
+    font-size:12px;
+    color:var(--ink-soft);
+    border-left:2px solid var(--line);
+    padding-left:12px;
+    line-height:1.6;
+  }
+
+  .carnet-card{
+    border:1px solid var(--line);
+    border-radius:var(--radius-m);
+    padding:28px 24px;
+    background:#fff;
+    text-align:center;
+  }
+  .carnet-header{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--teal); font-weight:700; margin-bottom:16px; }
+  .carnet-photo{
+    width:64px; height:64px; border-radius:50%;
+    background:var(--teal-soft); color:var(--teal);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:20px; margin:0 auto 12px;
+  }
+  .carnet-name{ font-weight:700; font-size:16px; }
+  .carnet-info{ font-size:12.5px; color:var(--ink-soft); margin-bottom:18px; }
+  .carnet-qr{
+    width:140px; height:140px; margin:0 auto 14px;
+    background-image:
+      repeating-linear-gradient(0deg, var(--ink) 0 6px, transparent 6px 12px),
+      repeating-linear-gradient(90deg, var(--ink) 0 6px, transparent 6px 12px);
+    background-blend-mode:multiply;
+    background-color:#fff;
+    box-shadow:0 0 0 1px var(--line);
+  }
+  .carnet-date{ font-size:12.5px; font-weight:600; color:var(--ink); }
+  .carnet-expired-tag{ display:none; margin-top:8px; font-size:11.5px; color:var(--bad); font-weight:600; }
+
+  @media (max-width: 860px){
+    .shell{ grid-template-columns:1fr; }
+    .sidebar{ flex-direction:row; overflow-x:auto; padding:14px 0; }
+    .sidebar-brand{ display:none; }
+    .nav-list{ display:flex; margin:0; }
+    .nav-item{ border-left:none; border-bottom:3px solid transparent; white-space:nowrap; }
+    .nav-item.active{ border-bottom-color:var(--ok); }
+    .sidebar-foot{ display:none; }
+    .topbar{ padding:18px 20px; flex-direction:column; align-items:flex-start; gap:8px; }
+    .screen{ padding:24px 20px 48px 20px; }
+    .lab-grid, .field-row, .filters{ grid-template-columns:1fr; }
+    .history-top{ flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="tag">Unibagué · Laboratorios</div>
+      <h1>Control de Asistencia</h1>
+    </div>
+    <ul class="nav-list" id="navList">
+      <li class="nav-item active" data-screen="login" tabindex="0"><span class="idx">01</span> Inicio de sesión</li>
+      <li class="nav-item" data-screen="seleccion" tabindex="0"><span class="idx">02</span> Curso y sesión</li>
+      <li class="nav-item" data-screen="asistencia" tabindex="0"><span class="idx">03</span> Toma de asistencia</li>
+      <li class="nav-item" data-screen="historial" tabindex="0"><span class="idx">04</span> Historial (estudiante)</li>
+      <li class="nav-item" data-screen="reportes" tabindex="0"><span class="idx">05</span> Reportes</li>
+    </ul>
+    <div class="sidebar-foot">Avance 1 — mock-ups navegables.<br>Los datos mostrados son de ejemplo.</div>
+  </nav>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="crumb" id="crumb">Pantalla 01 de 05</div>
+        <h2 id="screenTitle">Inicio de sesión</h2>
+      </div>
+      <div class="persona" id="personaBox">
+        <strong>—</strong>
+        Vista previa de mock-up
+      </div>
+    </div>
+
+    <!-- 01 LOGIN -->
+    <section class="screen active" id="screen-login">
+      <div class="login-wrap">
+        <div class="card login-card">
+          <div class="login-mark">A</div>
+          <h2>Ingresar al sistema</h2>
+          <div class="login-sub">Control de Asistencia · Laboratorios Unibagué</div>
+          <button class="btn-google" type="button" onclick="goTo('seleccion')">
+            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+              <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+              <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+              <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+              <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+            </svg>
+            Continuar con Google
+          </button>
+          <div class="login-divider">o con tu correo institucional</div>
+          <div class="field">
+            <label for="user">Correo institucional</label>
+            <input type="text" id="user" placeholder="nombre.apellido@unibague.edu.co" value="j.olivera@unibague.edu.co">
+          </div>
+          <div class="field">
+            <label for="pass">Contraseña</label>
+            <input type="password" id="pass" value="••••••••••">
+          </div>
+          <button class="btn-primary" style="width:100%" onclick="goTo('seleccion')">Iniciar sesión</button>
+          <div class="login-help">¿Olvidaste tu contraseña? Contacta a Coordinación Académica.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 SELECCION -->
+    <section class="screen" id="screen-seleccion">
+      <h3 style="font-size:15px; color:var(--ink-soft); font-weight:500; margin-bottom:14px;">Selecciona el laboratorio</h3>
+      <div class="lab-grid">
+        <div class="lab-option selected">
+          <div class="lab-name">Laboratorio de Redes — B-204</div>
+          <div class="lab-meta">Ing. de Sistemas · Capacidad: 28</div>
+        </div>
+        <div class="lab-option">
+          <div class="lab-name">Laboratorio de Software — B-201</div>
+          <div class="lab-meta">Ing. de Sistemas · Capacidad: 32</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:15px; color:var(--ink-soft); font-weight:500; margin-bottom:14px;">Sesiones del curso — Infraestructura y Seguridad Computacional</h3>
+      <div class="session-list">
+        <div class="session-row">
+          <div class="session-time">2:00 p.m.</div>
+          <div class="session-info">
+            <strong>Práctica 6 — Hardening de servidores</strong>
+            <div>Grupo 22A16 · 26 estudiantes citados</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="pill pill-live">En curso</span>
+            <button class="btn-primary" onclick="goTo('asistencia')">Tomar asistencia</button>
+          </div>
+        </div>
+        <div class="session-row disabled">
+          <div class="session-time">4:00 p.m.</div>
+          <div class="session-info">
+            <strong>Práctica 7 — Análisis de vulnerabilidades</strong>
+            <div>Grupo 22A16 · 26 estudiantes citados</div>
+          </div>
+          <span class="pill pill-soon">Próxima</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 ASISTENCIA -->
+    <section class="screen" id="screen-asistencia">
+      <div class="att-header">
+        <div>
+          <strong style="font-size:15px;">Práctica 6 — Hardening de servidores</strong>
+          <div class="count">Laboratorio de Redes B-204 · 26 estudiantes</div>
+        </div>
+        <div class="count">18 registrados · 8 pendientes</div>
+      </div>
+      <div class="scan-bar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20v.01"/>
+        </svg>
+        <input type="text" id="qrInput" placeholder="Escanea el código QR del carnet estudiantil…" autocomplete="off" autofocus>
+        <span class="scan-hint">El lector actúa como teclado: escanea y confirma con Enter</span>
+      </div>
+      <div class="roster">
+        <div class="roster-row" data-code="220112034">
+          <div class="avatar">MT</div>
+          <div>
+            <div class="stu-name">Mariana Troncoso</div>
+            <div class="stu-code">220112034</div>
+          </div>
+          <div>
+            <div class="status-group">
+              <button class="status-btn p on">Presente</button>
+              <button class="status-btn t">Tarde</button>
+              <button class="status-btn a">Ausente</button>
+            </div>
+            <div class="status-time">Registrado 2:03 p.m. · QR</div>
+          </div>
+        </div>
+        <div class="roster-row" data-code="220108771">
+          <div class="avatar">SR</div>
+          <div>
+            <div class="stu-name">Sebastián Rodríguez</div>
+            <div class="stu-code">220108771</div>
+          </div>
+          <div>
+            <div class="status-group">
+              <button class="status-btn p">Presente</button>
+              <button class="status-btn t on">Tarde</button>
+              <button class="status-btn a">Ausente</button>
+            </div>
+            <div class="status-time">Registrado 2:14 p.m. · QR</div>
+          </div>
+        </div>
+        <div class="roster-row" data-code="220119902">
+          <div class="avatar">CD</div>
+          <div>
+            <div class="stu-name">Camila Duarte</div>
+            <div class="stu-code">220119902</div>
+          </div>
+          <div>
+            <div class="status-group">
+              <button class="status-btn p">Presente</button>
+              <button class="status-btn t">Tarde</button>
+              <button class="status-btn a on">Ausente</button>
+            </div>
+            <div class="status-time">Registrado 2:20 p.m. · manual</div>
+          </div>
+        </div>
+        <div class="roster-row" data-code="220121887">
+          <div class="avatar">JG</div>
+          <div>
+            <div class="stu-name">Juan Guzmán</div>
+            <div class="stu-code">220121887</div>
+          </div>
+          <div>
+            <div class="status-group">
+              <button class="status-btn p">Presente</button>
+              <button class="status-btn t">Tarde</button>
+              <button class="status-btn a">Ausente</button>
+            </div>
+            <div class="status-time" style="color:var(--warn);">Sin registrar</div>
+          </div>
+        </div>
+      </div>
+      <div class="att-actions">
+        <button class="btn-secondary" onclick="goTo('seleccion')">Volver</button>
+        <button class="btn-primary" onclick="goTo('historial')">Guardar asistencia</button>
+      </div>
+    </section>
+
+    <!-- 04 HISTORIAL -->
+    <section class="screen" id="screen-historial">
+      <div class="history-top">
+        <div class="ring">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle cx="48" cy="48" r="42" fill="none" stroke="var(--line)" stroke-width="9"/>
+            <circle cx="48" cy="48" r="42" fill="none" stroke="var(--teal)" stroke-width="9"
+              stroke-dasharray="264" stroke-dashoffset="45" stroke-linecap="round"/>
+          </svg>
+          <div class="ring-label"><strong>83%</strong><span>ASISTENCIA</span></div>
+        </div>
+        <div class="history-summary">
+          <h3>Infraestructura y Seguridad Computacional — 22A16</h3>
+          <p>15 sesiones citadas en el periodo, 12 asistidas, 2 llegadas tarde y 1 ausencia. El porcentaje se calcula sobre el total de sesiones registradas por el docente.</p>
+        </div>
+      </div>
+      <div class="hist-list">
+        <div class="hist-row">
+          <div class="hist-date">18 ago</div>
+          <div>Práctica 5 — Configuración de firewall</div>
+          <span class="badge ok">100%</span>
+        </div>
+        <div class="hist-row">
+          <div class="hist-date">11 ago</div>
+          <div>Práctica 4 — Políticas de acceso ISO 27001</div>
+          <span class="badge warn">50%</span>
+        </div>
+        <div class="hist-row">
+          <div class="hist-date">04 ago</div>
+          <div>Práctica 3 — Escaneo de puertos</div>
+          <span class="badge ok">100%</span>
+        </div>
+        <div class="hist-row">
+          <div class="hist-date">28 jul</div>
+          <div>Práctica 2 — Segmentación de red</div>
+          <span class="badge bad">0%</span>
+        </div>
+      </div>
+      <div style="margin-top:22px; text-align:right;">
+        <button class="btn-primary" onclick="goTo('carnet')">Ver mi carné virtual</button>
+      </div>
+    </section>
+
+    <!-- 04b CARNÉ VIRTUAL (estudiante) -->
+    <section class="screen" id="screen-carnet">
+      <div class="carnet-card" style="max-width:340px; margin:0 auto;">
+        <div class="carnet-header">Universidad de Ibagué</div>
+        <div class="carnet-photo">MT</div>
+        <div class="carnet-name">Mariana Troncoso</div>
+        <div class="carnet-info">Ingeniería de Sistemas · 220112034</div>
+        <div class="carnet-qr"></div>
+        <div class="carnet-date">Válido para hoy · <span id="carnetDate"></span></div>
+        <div class="carnet-expired-tag" id="carnetExpiredTag">Este carné ya no es válido — vuelve a abrirlo para actualizarlo</div>
+      </div>
+      <p class="note" style="max-width:340px; margin:20px auto 0;">Este código se regenera cada vez que abres tu carné y solo es válido durante el día de hoy, igual que en la app oficial de Unibagué. Muéstraselo al docente para que lo escanee y registre tu asistencia.</p>
+      <div style="max-width:340px; margin:20px auto 0; text-align:center;">
+        <button class="btn-secondary" onclick="goTo('historial')">Volver al historial</button>
+      </div>
+    </section>
+
+    <!-- 05 REPORTES -->
+    <section class="screen" id="screen-reportes">
+      <div class="card" style="margin-bottom:22px;">
+        <div class="filters">
+          <div class="field" style="margin-bottom:0;">
+            <label>Curso</label>
+            <select><option>Infraestructura y Seguridad Computacional</option><option>Ingeniería de Software</option></select>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>Docente</label>
+            <select><option>Todos</option><option>Juan M. Chagüendo</option></select>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>Rango de fechas</label>
+            <input type="text" value="01 jul — 29 ago 2026">
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:22px;">
+        <h3 style="font-size:15px; margin-bottom:14px;">Lista de grupo — 22A16</h3>
+        <div class="roster">
+          <div class="roster-row" style="grid-template-columns:32px 1fr auto;">
+            <div class="avatar">MT</div>
+            <div>
+              <div class="stu-name">Mariana Troncoso</div>
+              <div class="stu-code">220112034</div>
+            </div>
+            <div class="stu-code">Activa</div>
+          </div>
+          <div class="roster-row" style="grid-template-columns:32px 1fr auto;">
+            <div class="avatar">SR</div>
+            <div>
+              <div class="stu-name">Sebastián Rodríguez</div>
+              <div class="stu-code">220108771</div>
+            </div>
+            <div class="stu-code">Activo</div>
+          </div>
+          <div class="roster-row" style="grid-template-columns:32px 1fr auto;">
+            <div class="avatar">CD</div>
+            <div>
+              <div class="stu-name">Camila Duarte</div>
+              <div class="stu-code">220119902</div>
+            </div>
+            <div class="stu-code">Activa</div>
+          </div>
+          <div class="roster-row" style="grid-template-columns:32px 1fr auto;">
+            <div class="avatar">JG</div>
+            <div>
+              <div class="stu-name">Juan Guzmán</div>
+              <div class="stu-code">220121887</div>
+            </div>
+            <div class="stu-code">Activo</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-preview">
+        <table>
+          <thead>
+            <tr><th>Estudiante</th><th>Código</th><th>Sesiones citadas</th><th>Asistencia</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Mariana Troncoso</td><td class="mono">220112034</td><td>15</td>
+              <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:93%"></div></div>93%</div></td>
+            </tr>
+            <tr>
+              <td>Sebastián Rodríguez</td><td class="mono">220108771</td><td>15</td>
+              <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div>80%</div></td>
+            </tr>
+            <tr>
+              <td>Camila Duarte</td><td class="mono">220119902</td><td>15</td>
+              <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:53%; background:var(--bad);"></div></div>53%</div></td>
+            </tr>
+            <tr>
+              <td>Juan Guzmán</td><td class="mono">220121887</td><td>15</td>
+              <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:73%; background:var(--warn);"></div></div>73%</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="export-row">
+        <button class="btn-secondary">Exportar Excel</button>
+        <button class="btn-primary">Exportar PDF</button>
+      </div>
+      <div class="note">Camila Duarte está por debajo del umbral de asistencia mínimo (75%). El reporte resalta automáticamente los casos que requieren seguimiento por parte de Coordinación Académica.</div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+  const titles = {
+    login: "Inicio de sesión",
+    seleccion: "Selección de curso y sesión",
+    asistencia: "Toma de asistencia",
+    historial: "Historial de asistencia (estudiante)",
+    carnet: "Carné virtual (estudiante)",
+    reportes: "Generación de reportes"
+  };
+  const order = ["login","seleccion","asistencia","historial","reportes"];
+
+  function goTo(name){
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById("screen-" + name).classList.add("active");
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    const navItem = document.querySelector('.nav-item[data-screen="'+name+'"]');
+    if(navItem) navItem.classList.add("active");
+    document.getElementById("screenTitle").textContent = titles[name];
+    const idx = order.indexOf(name) + 1;
+    document.getElementById("crumb").textContent = idx > 0
+      ? "Pantalla " + String(idx).padStart(2,"0") + " de 05"
+      : "Vista adicional del estudiante";
+    window.scrollTo(0,0);
+  }
+
+  document.querySelectorAll(".nav-item").forEach(item => {
+    item.addEventListener("click", () => goTo(item.dataset.screen));
+    item.addEventListener("keydown", e => { if(e.key === "Enter") goTo(item.dataset.screen); });
+  });
+
+  document.querySelectorAll(".status-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const group = btn.closest(".status-group");
+      group.querySelectorAll(".status-btn").forEach(b => b.classList.remove("on"));
+      btn.classList.add("on");
+    });
+  });
+
+  document.querySelectorAll(".lab-option").forEach(opt => {
+    opt.addEventListener("click", () => {
+      document.querySelectorAll(".lab-option").forEach(o => o.classList.remove("selected"));
+      opt.classList.add("selected");
+    });
+  });
+
+  const now0 = new Date();
+  const todayISO = now0.getFullYear() + "-" + String(now0.getMonth()+1).padStart(2,"0") + "-" + String(now0.getDate()).padStart(2,"0");
+  const todayLabel = now0.toLocaleDateString("es-CO", { day:"2-digit", month:"long", year:"numeric" });
+  const carnetDateEl = document.getElementById("carnetDate");
+  if(carnetDateEl) carnetDateEl.textContent = todayLabel;
+
+  // Simula el refresco diario del carné: al tocar el QR se puede "envejecer" un día para
+  // demostrar en la sustentación qué pasa cuando el estudiante no lo actualiza.
+  let carnetExpiredDemo = false;
+  const carnetQrEl = document.querySelector(".carnet-qr");
+  const carnetExpiredTag = document.getElementById("carnetExpiredTag");
+  if(carnetQrEl){
+    carnetQrEl.style.cursor = "pointer";
+    carnetQrEl.title = "Clic para simular un carné vencido (demo)";
+    carnetQrEl.addEventListener("click", () => {
+      carnetExpiredDemo = !carnetExpiredDemo;
+      carnetQrEl.style.opacity = carnetExpiredDemo ? "0.35" : "1";
+      carnetExpiredTag.style.display = carnetExpiredDemo ? "block" : "none";
+    });
+  }
+
+  const qrInput = document.getElementById("qrInput");
+  if(qrInput){
+    qrInput.addEventListener("keydown", e => {
+      if(e.key !== "Enter") return;
+      const raw = qrInput.value.trim();
+      qrInput.value = "";
+      if(!raw) return;
+      const [code, scannedDate] = raw.split("|");
+      const row = document.querySelector('.roster-row[data-code="'+code+'"]');
+      if(!row){
+        qrInput.placeholder = "Carné no reconocido — verifica el código e intenta de nuevo";
+        setTimeout(() => { qrInput.placeholder = "Escanea el código QR del carné estudiantil…"; }, 2200);
+        return;
+      }
+      const isMarianaDemo = code === "220112034";
+      const effectiveDate = scannedDate || (isMarianaDemo && carnetExpiredDemo ? "2026-08-01" : todayISO);
+      if(effectiveDate !== todayISO){
+        qrInput.placeholder = "Carné vencido o no actualizado — pide al estudiante que lo abra de nuevo";
+        row.classList.add("just-scanned");
+        row.querySelector(".status-time").textContent = "Carné vencido — sin registrar";
+        row.querySelector(".status-time").style.color = "var(--bad)";
+        setTimeout(() => {
+          row.classList.remove("just-scanned");
+          qrInput.placeholder = "Escanea el código QR del carné estudiantil…";
+        }, 2200);
+        return;
+      }
+      row.querySelectorAll(".status-btn").forEach(b => b.classList.remove("on"));
+      row.querySelector(".status-btn.p").classList.add("on");
+      const now = new Date();
+      const hh = now.getHours() % 12 || 12;
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const ampm = now.getHours() >= 12 ? "p.m." : "a.m.";
+      row.querySelector(".status-time").textContent = "Registrado " + hh + ":" + mm + " " + ampm + " · QR";
+      row.querySelector(".status-time").style.color = "";
+      row.classList.add("just-scanned");
+      setTimeout(() => row.classList.remove("just-scanned"), 1200);
+    });
+  }
+</script>
+
+</body>
+</html>
