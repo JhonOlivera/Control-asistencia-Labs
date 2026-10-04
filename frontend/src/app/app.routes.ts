@@ -60,9 +60,7 @@ export const routes: Routes = [
 			{
 				path: 'dashboard',
 				loadComponent: () =>
-					import('./layout/en-construccion.component').then(
-						(module) => module.EnConstruccionComponent,
-					),
+					import('./dashboard/dashboard.component').then((module) => module.DashboardComponent),
 			},
 		],
 	},
