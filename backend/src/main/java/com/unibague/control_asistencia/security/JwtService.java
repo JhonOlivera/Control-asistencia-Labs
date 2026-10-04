@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService {
 
+    public static final String CLAIM_ID = "id";
     public static final String CLAIM_NOMBRE = "nombre";
     public static final String CLAIM_ROL = "rol";
 
@@ -30,6 +31,7 @@ public class JwtService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("control-asistencia")
                 .subject(usuario.correo())
+                .claim(CLAIM_ID, usuario.id())
                 .claim(CLAIM_NOMBRE, usuario.nombre())
                 .claim(CLAIM_ROL, usuario.rol())
                 .issuedAt(ahora)

@@ -25,8 +25,22 @@ export const routes: Routes = [
 			{
 				path: 'sesiones',
 				loadComponent: () =>
-					import('./layout/en-construccion.component').then(
-						(module) => module.EnConstruccionComponent,
+					import('./sesiones/sesiones-lista.component').then(
+						(module) => module.SesionesListaComponent,
+					),
+			},
+			{
+				path: 'sesiones/nueva',
+				loadComponent: () =>
+					import('./sesiones/sesion-form.component').then(
+						(module) => module.SesionFormComponent,
+					),
+			},
+			{
+				path: 'sesiones/:id',
+				loadComponent: () =>
+					import('./sesiones/sesion-detalle.component').then(
+						(module) => module.SesionDetalleComponent,
 					),
 			},
 			{

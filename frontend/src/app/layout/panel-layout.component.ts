@@ -29,7 +29,11 @@ const ITEMS_MENU: ItemMenu[] = [
         <p class="menu-titulo">Control de asistencia</p>
         <nav>
           @for (item of items; track item.ruta) {
-            <a [routerLink]="item.ruta" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: item.ruta === '/panel' }">
+            <a
+              [routerLink]="item.ruta"
+              routerLinkActive="activo"
+              [routerLinkActiveOptions]="{ exact: item.ruta === '/panel' }"
+            >
               {{ item.etiqueta }}
             </a>
           }
@@ -52,22 +56,94 @@ const ITEMS_MENU: ItemMenu[] = [
     </div>
   `,
   styles: `
-    :host { display: block; min-height: 100dvh; font-family: "Trebuchet MS", sans-serif; }
-    .panel-layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100dvh; background: var(--color-fondo); }
-    .menu { display: flex; flex-direction: column; gap: 16px; padding: 24px 16px; background: var(--color-superficie); border-right: 1px solid var(--color-borde); }
-    .menu-titulo { margin: 0 0 8px; color: var(--color-primario); font-size: 13px; font-weight: 700; text-transform: uppercase; }
-    nav { display: grid; gap: 4px; }
-    nav a { padding: 10px 12px; border-radius: 6px; color: var(--color-texto); text-decoration: none; font-weight: 600; }
-    nav a:hover { background: var(--color-fondo); }
-    nav a.activo { background: var(--color-primario-suave); color: var(--color-primario); }
-    .contenido { display: flex; flex-direction: column; min-width: 0; }
-    .encabezado { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--color-borde); background: var(--color-superficie); }
-    .usuario { display: flex; flex-direction: column; }
-    .usuario .nombre { font-weight: 700; color: var(--color-texto); }
-    .usuario .rol { font-size: 12px; color: var(--color-texto-suave); }
-    .encabezado button { min-height: 40px; padding: 0 16px; border: 1px solid var(--color-borde); border-radius: 4px; background: var(--color-superficie); color: var(--color-texto); font: inherit; font-weight: 700; cursor: pointer; }
-    .encabezado button:hover { background: var(--color-fondo); }
-    .area-trabajo { flex: 1; padding: 24px; box-sizing: border-box; }
+    :host {
+      display: block;
+      min-height: 100dvh;
+      font-family: 'Trebuchet MS', sans-serif;
+    }
+    .panel-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100dvh;
+      background: var(--color-fondo);
+    }
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 24px 16px;
+      background: var(--color-superficie);
+      border-right: 1px solid var(--color-borde);
+    }
+    .menu-titulo {
+      margin: 0 0 8px;
+      color: var(--color-primario);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    nav {
+      display: grid;
+      gap: 4px;
+    }
+    nav a {
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: var(--color-texto);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    nav a:hover {
+      background: var(--color-fondo);
+    }
+    nav a.activo {
+      background: var(--color-primario-suave);
+      color: var(--color-primario);
+    }
+    .contenido {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .encabezado {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--color-borde);
+      background: var(--color-superficie);
+    }
+    .usuario {
+      display: flex;
+      flex-direction: column;
+    }
+    .usuario .nombre {
+      font-weight: 700;
+      color: var(--color-texto);
+    }
+    .usuario .rol {
+      font-size: 12px;
+      color: var(--color-texto-suave);
+    }
+    .encabezado button {
+      min-height: 40px;
+      padding: 0 16px;
+      border: 1px solid var(--color-borde);
+      border-radius: 4px;
+      background: var(--color-superficie);
+      color: var(--color-texto);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .encabezado button:hover {
+      background: var(--color-fondo);
+    }
+    .area-trabajo {
+      flex: 1;
+      padding: 24px;
+      box-sizing: border-box;
+    }
   `,
 })
 export class PanelLayoutComponent implements OnInit {

@@ -9,9 +9,20 @@ import { Component } from '@angular/core';
     </section>
   `,
   styles: `
-    .en-construccion { display: grid; gap: 8px; place-items: start; }
-    h1 { margin: 0; font-size: 26px; color: var(--color-texto); }
-    p { margin: 0; color: var(--color-texto-suave); }
+    .en-construccion {
+      display: grid;
+      gap: 8px;
+      place-items: start;
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      color: var(--color-texto);
+    }
+    p {
+      margin: 0;
+      color: var(--color-texto-suave);
+    }
   `,
 })
 export class EnConstruccionComponent {}

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { apiUrl } from './environment';
 
 export interface UsuarioAutenticado {
+  id: number;
   correo: string;
   nombre: string;
   rol: 'ADMINISTRADOR' | 'DOCENTE';

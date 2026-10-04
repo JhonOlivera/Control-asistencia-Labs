@@ -16,6 +16,7 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<UsuarioAutenticadoDto> obtenerUsuarioActual(@AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(new UsuarioAutenticadoDto(
+                jwt.getClaim(JwtService.CLAIM_ID),
                 jwt.getSubject(),
                 jwt.getClaimAsString(JwtService.CLAIM_NOMBRE),
                 jwt.getClaimAsString(JwtService.CLAIM_ROL)
