@@ -71,6 +71,7 @@ public class AsistenciaService {
                 estudiante.getNombre(),
                 sesion.getLaboratorio().getNombre(),
                 estado,
+                ahora,
                 "Asistencia registrada correctamente."
         );
     }
