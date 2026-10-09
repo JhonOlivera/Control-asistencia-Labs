@@ -62,6 +62,13 @@ export const routes: Routes = [
 				loadComponent: () =>
 					import('./dashboard/dashboard.component').then((module) => module.DashboardComponent),
 			},
+			{
+				path: 'estudiantes/:id/historial',
+				loadComponent: () =>
+					import('./historial/historial-estudiante.component').then(
+						(module) => module.HistorialEstudianteComponent,
+					),
+			},
 		],
 	},
 	{
