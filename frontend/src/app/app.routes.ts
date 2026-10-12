@@ -46,8 +46,8 @@ export const routes: Routes = [
 			{
 				path: 'laboratorios',
 				loadComponent: () =>
-					import('./layout/en-construccion.component').then(
-						(module) => module.EnConstruccionComponent,
+					import('./laboratorios/laboratorios.component').then(
+						(module) => module.LaboratoriosComponent,
 					),
 			},
 			{

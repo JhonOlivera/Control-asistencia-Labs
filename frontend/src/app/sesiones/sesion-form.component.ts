@@ -3,14 +3,9 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, UsuarioAutenticado } from '../core/auth.service';
+import { Laboratorio, LaboratorioService } from '../laboratorios/laboratorio.service';
 import { Curso, CursoService } from './curso.service';
 import { SesionesService } from './sesiones.service';
-
-/**
- * TODO(laboratorios): quitar esta constante cuando exista GET /api/laboratorios.
- * Apunta al laboratorio de prueba que crea DataSeeder ("Laboratorio de Sistemas").
- */
-const LABORATORIO_TEMPORAL = { id: 1, nombre: 'Laboratorio de Sistemas (temporal)' };
 
 @Component({
   selector: 'app-sesion-form',
@@ -36,8 +31,11 @@ const LABORATORIO_TEMPORAL = { id: 1, nombre: 'Laboratorio de Sistemas (temporal
 
         <label>
           Laboratorio
-          <select name="laboratorioId" [(ngModel)]="laboratorioId" required disabled>
-            <option [ngValue]="laboratorioTemporal.id">{{ laboratorioTemporal.nombre }}</option>
+          <select name="laboratorioId" [(ngModel)]="laboratorioId" required>
+            <option [ngValue]="null" disabled>Selecciona un laboratorio</option>
+            @for (laboratorio of laboratorios(); track laboratorio.id) {
+              <option [ngValue]="laboratorio.id">{{ laboratorio.nombre }}</option>
+            }
           </select>
         </label>
 
@@ -137,19 +135,19 @@ const LABORATORIO_TEMPORAL = { id: 1, nombre: 'Laboratorio de Sistemas (temporal
 })
 export class SesionFormComponent implements OnInit {
   private readonly cursoService = inject(CursoService);
+  private readonly laboratorioService = inject(LaboratorioService);
   private readonly sesionesService = inject(SesionesService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly laboratorioTemporal = LABORATORIO_TEMPORAL;
-
   cursos = signal<Curso[]>([]);
+  laboratorios = signal<Laboratorio[]>([]);
   usuario = signal<UsuarioAutenticado | null>(null);
   error = signal<string | null>(null);
   guardando = signal(false);
 
   cursoId: number | null = null;
-  laboratorioId = LABORATORIO_TEMPORAL.id;
+  laboratorioId: number | null = null;
   fecha = '';
   hora = '';
   tema = '';
@@ -160,6 +158,12 @@ export class SesionFormComponent implements OnInit {
       error: () => this.error.set('No se pudieron cargar los cursos.'),
     });
 
+    this.laboratorioService.listarLaboratorios().subscribe({
+      next: (laboratorios) =>
+        this.laboratorios.set(laboratorios.filter((laboratorio) => laboratorio.estado === 'ACTIVO')),
+      error: () => this.error.set('No se pudieron cargar los laboratorios.'),
+    });
+
     this.auth.obtenerUsuario().subscribe({
       next: (usuario) => this.usuario.set(usuario),
       error: () => this.error.set('No se pudo determinar el administrador autenticado.'),
@@ -167,7 +171,7 @@ export class SesionFormComponent implements OnInit {
   }
 
   guardar(): void {
-    if (!this.cursoId || !this.fecha || !this.hora || !this.tema.trim()) {
+    if (!this.cursoId || !this.laboratorioId || !this.fecha || !this.hora || !this.tema.trim()) {
       this.error.set('Completa todos los campos.');
       return;
     }
