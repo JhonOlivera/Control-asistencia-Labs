@@ -11,7 +11,7 @@ import { AuthService } from '../core/auth.service';
   `,
   styles: `
     :host { display: block; min-height: 100dvh; }
-    .callback { display: grid; min-height: 100dvh; place-items: center; background: #f4f5ef; color: #172b2a; font-family: "Trebuchet MS", sans-serif; font-size: 20px; }
+    .callback { display: grid; min-height: 100dvh; place-items: center; background: var(--color-fondo); color: var(--color-texto); font-family: "Trebuchet MS", sans-serif; font-size: 20px; }
   `,
 })
 export class CallbackComponent implements OnInit {

@@ -12,4 +12,25 @@
   --color-advertencia-suave: #f5ead1;
   --color-error: #9b392f;
   --color-error-suave: #f5ddd9;
+  /* Texto siempre claro sobre superficies de color sólido (botones primarios), igual en ambos temas. */
+  --color-sobre-primario: #ffffff;
+}
+
+:root[data-theme='dark'] {
+  --color-primario: #1f8f66;
+  --color-primario-suave: #123a2a;
+  --color-fondo: #0d1117;
+  --color-superficie: #161b22;
+  --color-borde: #30363d;
+  --color-texto: #e6edf3;
+  --color-texto-suave: #8b949e;
+  --color-advertencia: #d29922;
+  --color-advertencia-suave: #3a2e0f;
+  --color-error: #f85149;
+  --color-error-suave: #3a1618;
+}
+
+body {
+  background: var(--color-fondo);
+  color: var(--color-texto);
 }

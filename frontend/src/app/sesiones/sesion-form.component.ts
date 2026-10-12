@@ -77,8 +77,8 @@ import { SesionesService } from './sesiones.service';
     .error {
       padding: 10px 14px;
       border-radius: 6px;
-      background: #fde8e8;
-      color: #9b2c2c;
+      background: var(--color-error-suave);
+      color: var(--color-error);
     }
     form {
       display: grid;
@@ -120,7 +120,7 @@ import { SesionesService } from './sesiones.service';
     .acciones button[type='submit'] {
       border: 1px solid var(--color-primario);
       background: var(--color-primario);
-      color: #fff;
+      color: var(--color-sobre-primario);
     }
     .acciones button[type='submit']:disabled {
       opacity: 0.6;

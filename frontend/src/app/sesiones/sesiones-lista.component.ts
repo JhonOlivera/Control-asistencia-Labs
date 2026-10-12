@@ -74,7 +74,7 @@ import { SesionResumen, SesionesService } from './sesiones.service';
       border: 1px solid var(--color-primario);
       border-radius: 4px;
       background: var(--color-primario);
-      color: #fff;
+      color: var(--color-sobre-primario);
       font: inherit;
       font-weight: 700;
       cursor: pointer;
@@ -85,8 +85,8 @@ import { SesionResumen, SesionesService } from './sesiones.service';
     .error {
       padding: 10px 14px;
       border-radius: 6px;
-      background: #fde8e8;
-      color: #9b2c2c;
+      background: var(--color-error-suave);
+      color: var(--color-error);
     }
     table {
       width: 100%;

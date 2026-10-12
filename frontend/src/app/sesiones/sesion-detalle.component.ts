@@ -96,8 +96,8 @@ const INTERVALO_ACTUALIZACION_MS = 10_000;
     .error {
       padding: 10px 14px;
       border-radius: 6px;
-      background: #fde8e8;
-      color: #9b2c2c;
+      background: var(--color-error-suave);
+      color: var(--color-error);
     }
     .mensaje {
       padding: 10px 14px;
@@ -146,7 +146,7 @@ const INTERVALO_ACTUALIZACION_MS = 10_000;
       cursor: pointer;
       border: 1px solid var(--color-primario);
       background: var(--color-primario);
-      color: #fff;
+      color: var(--color-sobre-primario);
     }
     .acciones button:disabled {
       opacity: 0.6;
