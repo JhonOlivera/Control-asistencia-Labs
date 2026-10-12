@@ -134,7 +134,7 @@ import { Laboratorio, LaboratorioRequest, LaboratorioService } from './laborator
       border: 1px solid var(--color-primario);
       border-radius: 4px;
       background: var(--color-primario);
-      color: #fff;
+      color: var(--color-sobre-primario);
       font: inherit;
       font-weight: 700;
       cursor: pointer;
@@ -145,8 +145,8 @@ import { Laboratorio, LaboratorioRequest, LaboratorioService } from './laborator
     .error {
       padding: 10px 14px;
       border-radius: 6px;
-      background: #fde8e8;
-      color: #9b2c2c;
+      background: var(--color-error-suave);
+      color: var(--color-error);
     }
     .formulario {
       display: grid;
@@ -192,7 +192,7 @@ import { Laboratorio, LaboratorioRequest, LaboratorioService } from './laborator
     .acciones button[type='submit'] {
       border: 1px solid var(--color-primario);
       background: var(--color-primario);
-      color: #fff;
+      color: var(--color-sobre-primario);
     }
     .acciones button[type='submit']:disabled {
       opacity: 0.6;

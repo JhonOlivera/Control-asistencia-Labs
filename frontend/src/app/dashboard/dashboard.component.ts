@@ -74,8 +74,8 @@ import { ReportesService, ResumenReporte } from './reportes.service';
     .error {
       padding: 10px 14px;
       border-radius: 6px;
-      background: #fde8e8;
-      color: #9b2c2c;
+      background: var(--color-error-suave);
+      color: var(--color-error);
     }
     .tarjetas {
       display: grid;
@@ -148,7 +148,7 @@ import { ReportesService, ResumenReporte } from './reportes.service';
     .relleno {
       height: 100%;
       border-radius: 999px;
-      background: #c0392b;
+      background: var(--color-error);
     }
   `,
 })

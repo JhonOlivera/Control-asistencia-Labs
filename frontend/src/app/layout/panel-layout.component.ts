@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService, UsuarioAutenticado } from '../core/auth.service';
+import { ThemeService } from '../core/theme.service';
 
 const NOMBRES_ROL: Record<UsuarioAutenticado['rol'], string> = {
   ADMINISTRADOR: 'Administrador',
@@ -47,7 +48,18 @@ const ITEMS_MENU: ItemMenu[] = [
               <span class="rol">{{ nombreRol(usuario.rol) }}</span>
             </div>
           }
-          <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+          <div class="acciones">
+            <button
+              type="button"
+              (click)="themeService.alternarTema()"
+              [attr.aria-label]="
+                themeService.tema() === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
+              "
+            >
+              {{ themeService.tema() === 'dark' ? 'Modo claro' : 'Modo oscuro' }}
+            </button>
+            <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+          </div>
         </header>
         <main class="area-trabajo">
           <router-outlet />
@@ -125,6 +137,10 @@ const ITEMS_MENU: ItemMenu[] = [
       font-size: 12px;
       color: var(--color-texto-suave);
     }
+    .acciones {
+      display: flex;
+      gap: 10px;
+    }
     .encabezado button {
       min-height: 40px;
       padding: 0 16px;
@@ -149,6 +165,7 @@ const ITEMS_MENU: ItemMenu[] = [
 export class PanelLayoutComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  protected readonly themeService = inject(ThemeService);
 
   readonly items = ITEMS_MENU;
   usuario = signal<UsuarioAutenticado | null>(null);
