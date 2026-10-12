@@ -15,6 +15,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(ValidacionLaboratorioException.class)
+    public ResponseEntity<ErrorResponse> handleValidacionLaboratorio(ValidacionLaboratorioException ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+    }
+
     @ExceptionHandler(ValidacionAsistenciaException.class)
     public ResponseEntity<ErrorResponse> handleValidacionAsistencia(ValidacionAsistenciaException ex) {
         return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
