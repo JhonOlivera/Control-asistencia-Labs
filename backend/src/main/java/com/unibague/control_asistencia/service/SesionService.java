@@ -137,6 +137,7 @@ public class SesionService {
         validarLaboratorioActivo(laboratorio);
         validarHorarioDisponible(laboratorio.getHorarioDisponible(), request.getFecha(), request.getHora());
         validarSesionAbiertaDuplicada(laboratorio.getId(), request.getFecha(), request.getHora());
+        validarCapacidadLaboratorio(curso, laboratorio);
 
         Sesion sesion = new Sesion();
         sesion.setCurso(curso);
@@ -213,6 +214,16 @@ public class SesionService {
         if (existe) {
             throw new ValidacionSesionException(
                     "Ya existe otra sesión abierta en el mismo laboratorio para la misma fecha y hora."
+            );
+        }
+    }
+
+    private void validarCapacidadLaboratorio(Curso curso, Laboratorio laboratorio) {
+        int estudiantesActivos = estudianteRepository.findActivosByCursoId(curso.getId()).size();
+        if (estudiantesActivos > laboratorio.getCapacidad()) {
+            throw new ValidacionSesionException(
+                    "El curso tiene " + estudiantesActivos + " estudiantes activos y el laboratorio solo admite "
+                            + laboratorio.getCapacidad() + "."
             );
         }
     }
