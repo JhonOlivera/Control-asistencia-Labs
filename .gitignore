@@ -149,3 +149,6 @@ vite.config.ts.timestamp-*
 # Sistema operativo
 .DS_Store
 Thumbs.db
+
+# Configuración local de Claude Code (no compartida con el equipo)
+.claude/settings.local.json
