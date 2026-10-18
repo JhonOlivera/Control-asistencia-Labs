@@ -3,25 +3,23 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-en-construccion',
   template: `
-    <section class="en-construccion">
-      <h1>En construcción</h1>
-      <p>Esta sección estará disponible próximamente.</p>
+    <section class="estado-vacio en-construccion">
+      <h1>Estudiantes</h1>
+      <p>Esta sección está en construcción. Muy pronto podrás gestionar aquí los estudiantes registrados.</p>
     </section>
   `,
   styles: `
     .en-construccion {
       display: grid;
-      gap: 8px;
-      place-items: start;
+      gap: var(--espacio-2);
     }
     h1 {
       margin: 0;
-      font-size: 26px;
+      font-size: var(--texto-xl);
       color: var(--color-texto);
     }
     p {
       margin: 0;
-      color: var(--color-texto-suave);
     }
   `,
 })

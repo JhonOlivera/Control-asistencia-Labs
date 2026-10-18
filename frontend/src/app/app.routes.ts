@@ -1,7 +1,16 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
+import { AuthService } from './core/auth.service';
+
+const redirigirSegunSesion = () => (inject(AuthService).estaAutenticado() ? '/panel' : '/login');
 
 export const routes: Routes = [
+	{
+		path: '',
+		pathMatch: 'full',
+		redirectTo: redirigirSegunSesion,
+	},
 	{
 		path: 'login',
 		loadComponent: () => import('./auth/login.component').then((module) => module.LoginComponent),
@@ -75,5 +84,9 @@ export const routes: Routes = [
 		path: 'asistencia/confirmar',
 		loadComponent: () =>
 			import('./asistencia/confirmar.component').then((module) => module.ConfirmarComponent),
+	},
+	{
+		path: '**',
+		redirectTo: redirigirSegunSesion,
 	},
 ];

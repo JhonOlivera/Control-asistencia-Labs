@@ -1,10 +1,11 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { timeout } from 'rxjs';
 import { apiUrl } from '../core/environment';
 
 type EstadoAsistencia = 'PRESENTE' | 'TARDE' | 'AUSENTE' | 'JUSTIFICADO';
+type CategoriaFalla = 'vencido' | 'usado' | 'error';
 
 interface AsistenciaResponseDto {
   nombreEstudiante: string;
@@ -24,10 +25,16 @@ const MENSAJE_ERROR_GENERICO =
       @if (status() === 'loading') {
         <p class="mensaje-carga">Registrando asistencia...</p>
       } @else if (status() === 'success' && resultado()) {
-        <section class="tarjeta">
-          <h1 class="titulo exito">Asistencia registrada</h1>
+        <section class="card tarjeta">
+          <h1 class="titulo titulo-exito">Asistencia registrada</h1>
           <p class="estudiante">{{ resultado()!.nombreEstudiante }}</p>
-          <span class="badge" [class.tarde]="resultado()!.estadoRegistrado === 'TARDE'">
+          <span
+            [class]="
+              resultado()!.estadoRegistrado === 'TARDE'
+                ? 'badge-estado badge-estado--tarde'
+                : 'badge-estado badge-estado--presente'
+            "
+          >
             {{ resultado()!.estadoRegistrado }}
           </span>
           <dl class="detalle">
@@ -42,9 +49,13 @@ const MENSAJE_ERROR_GENERICO =
           </dl>
         </section>
       } @else {
-        <section class="tarjeta">
-          <h1 class="titulo falla">No se pudo registrar</h1>
-          <p class="mensaje-error">{{ mensajeError() }}</p>
+        <section class="card tarjeta">
+          <h1 class="titulo" [class]="'titulo-' + categoriaFalla()">{{ tituloFalla() }}</h1>
+          @if (categoriaFalla() === 'error') {
+            <p class="mensaje-error">{{ mensajeError() }}</p>
+          } @else {
+            <p class="mensaje-cuerpo">{{ mensajeError() }}</p>
+          }
         </section>
       }
     </main>
@@ -56,9 +67,8 @@ const MENSAJE_ERROR_GENERICO =
       min-height: 100dvh;
       box-sizing: border-box;
       place-items: center;
-      padding: 24px 16px;
+      padding: var(--espacio-4);
       background: var(--color-fondo);
-      font-family: "Trebuchet MS", sans-serif;
       text-align: center;
       color: var(--color-texto);
     }
@@ -71,56 +81,45 @@ const MENSAJE_ERROR_GENERICO =
       width: 100%;
       max-width: 420px;
       box-sizing: border-box;
-      background: var(--color-superficie);
-      border: 1px solid var(--color-borde);
       border-radius: 16px;
       padding: 32px 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--sombra-md);
     }
     .titulo {
-      margin: 0 0 8px;
+      margin: 0 0 var(--espacio-2);
       font-size: clamp(24px, 6vw, 32px);
       line-height: 1.15;
     }
-    .titulo.exito { color: var(--color-primario); }
-    .titulo.falla { color: var(--color-error); }
+    .titulo-exito { color: var(--color-presente); }
+    .titulo-vencido { color: var(--color-tarde); }
+    .titulo-usado { color: var(--color-justificado); }
+    .titulo-error { color: var(--color-error); }
     .estudiante {
-      margin: 0 0 16px;
+      margin: 0 0 var(--espacio-4);
       font-size: clamp(16px, 4vw, 19px);
       color: var(--color-texto);
     }
-    .badge {
-      display: inline-block;
-      padding: 6px 16px;
-      border-radius: 999px;
-      font-weight: bold;
-      font-size: 14px;
-      letter-spacing: 0.04em;
-      background: var(--color-primario-suave);
-      color: var(--color-primario);
-    }
-    .badge.tarde {
-      background: var(--color-advertencia-suave);
-      color: var(--color-advertencia);
-    }
     .detalle {
-      margin: 24px 0 0;
+      margin: var(--espacio-5) 0 0;
       text-align: left;
     }
     .fila {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
-      padding: 10px 0;
+      gap: var(--espacio-3);
+      padding: var(--espacio-2) 0;
       border-top: 1px solid var(--color-borde);
       font-size: clamp(14px, 3.5vw, 16px);
     }
     .fila dt { color: var(--color-texto-suave); margin: 0; }
     .fila dd { margin: 0; font-weight: bold; text-align: right; }
-    .mensaje-error {
+    .mensaje-cuerpo {
       margin: 0;
       font-size: clamp(15px, 4vw, 17px);
-      color: var(--color-texto);
+      color: var(--color-texto-suave);
+    }
+    .mensaje-error {
+      font-size: clamp(15px, 4vw, 17px);
     }
   `,
 })
@@ -131,6 +130,28 @@ export class ConfirmarComponent implements OnInit {
   status = signal<'loading' | 'success' | 'error'>('loading');
   resultado = signal<AsistenciaResponseDto | null>(null);
   mensajeError = signal<string>(MENSAJE_ERROR_GENERICO);
+
+  readonly categoriaFalla = computed<CategoriaFalla>(() => {
+    const texto = this.mensajeError().toLowerCase();
+    if (texto.includes('expiró') || texto.includes('expiro') || texto.includes('venci')) {
+      return 'vencido';
+    }
+    if (texto.includes('ya fue usado') || texto.includes('ya fue registrada')) {
+      return 'usado';
+    }
+    return 'error';
+  });
+
+  readonly tituloFalla = computed(() => {
+    switch (this.categoriaFalla()) {
+      case 'vencido':
+        return 'Enlace vencido';
+      case 'usado':
+        return 'Enlace ya usado';
+      default:
+        return 'No se pudo registrar';
+    }
+  });
 
   horaFormateada(): string {
     const dto = this.resultado();

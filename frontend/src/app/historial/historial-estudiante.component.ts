@@ -14,9 +14,9 @@ import {
   template: `
     <section class="historial">
       @if (error(); as error) {
-        <p class="error" role="alert">{{ error }}</p>
+        <p class="mensaje-error" role="alert">{{ error }}</p>
       } @else if (cargando()) {
-        <p>Cargando historial del estudiante...</p>
+        <p class="cargando">Cargando historial del estudiante...</p>
       } @else if (historial(); as historial) {
         <header class="encabezado">
           <div>
@@ -29,11 +29,11 @@ import {
         <section class="cursos" aria-labelledby="titulo-cursos">
           <h2 id="titulo-cursos">Asistencia por curso</h2>
           @if (historial.porcentajesPorCurso.length === 0) {
-            <p class="vacio">No hay cursos para mostrar.</p>
+            <p class="estado-vacio">No hay cursos para mostrar.</p>
           } @else {
             <div class="tarjetas">
               @for (curso of historial.porcentajesPorCurso; track curso.cursoId) {
-                <article class="tarjeta">
+                <article class="card tarjeta">
                   <h3>{{ curso.curso }}</h3>
                   @if (curso.porcentaje === null) {
                     <p class="sin-sesiones">Sin sesiones cerradas</p>
@@ -64,10 +64,10 @@ import {
         <section class="sesiones" aria-labelledby="titulo-sesiones">
           <h2 id="titulo-sesiones">Sesiones</h2>
           @if (historial.sesiones.length === 0) {
-            <p class="vacio">No hay sesiones para mostrar.</p>
+            <p class="estado-vacio">No hay sesiones para mostrar.</p>
           } @else {
             <div class="tabla-contenedor">
-              <table>
+              <table class="tabla">
                 <thead>
                   <tr>
                     <th>Fecha</th>
@@ -79,13 +79,11 @@ import {
                 <tbody>
                   @for (sesion of historial.sesiones; track sesion.sesionId) {
                     <tr>
-                      <td>{{ sesion.fecha }} {{ sesion.hora }}</td>
-                      <td>{{ sesion.curso }}</td>
-                      <td>{{ sesion.laboratorio }}</td>
-                      <td>
-                        <span class="estado" [class]="claseEstado(sesion.estado)">
-                          {{ sesion.estado }}
-                        </span>
+                      <td data-label="Fecha">{{ sesion.fecha }} {{ sesion.hora }}</td>
+                      <td data-label="Curso">{{ sesion.curso }}</td>
+                      <td data-label="Laboratorio">{{ sesion.laboratorio }}</td>
+                      <td data-label="Estado">
+                        <span [class]="claseEstado(sesion.estado)">{{ sesion.estado }}</span>
                       </td>
                     </tr>
                   }
@@ -100,14 +98,14 @@ import {
   styles: `
     .historial {
       display: grid;
-      gap: 24px;
+      gap: var(--espacio-5);
       color: var(--color-texto);
     }
     .encabezado {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 16px;
+      gap: var(--espacio-4);
     }
     h1,
     h2,
@@ -116,63 +114,59 @@ import {
       margin: 0;
     }
     h1 {
-      font-size: 24px;
+      font-size: var(--texto-xl);
     }
     h2 {
-      margin-bottom: 12px;
-      font-size: 18px;
+      margin-bottom: var(--espacio-3);
+      font-size: var(--texto-lg);
     }
     h3 {
-      font-size: 16px;
+      font-size: var(--texto-base);
     }
     .codigo,
     .sesiones {
       color: var(--color-texto-suave);
     }
     .codigo {
-      margin-top: 4px;
+      margin-top: var(--espacio-1);
     }
     .etiqueta {
-      padding: 6px 12px;
-      border-radius: 999px;
+      padding: var(--espacio-1) var(--espacio-3);
+      border-radius: var(--radio-pill);
       background: var(--color-primario-suave);
       color: var(--color-primario);
-      font-size: 12px;
+      font-size: var(--texto-xs);
       font-weight: 700;
       white-space: nowrap;
     }
     .tarjetas {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
+      gap: var(--espacio-4);
     }
     .tarjeta {
       display: grid;
       align-content: start;
-      gap: 14px;
-      padding: 18px;
-      border: 1px solid var(--color-borde);
-      border-radius: 8px;
-      background: var(--color-superficie);
+      gap: var(--espacio-3);
     }
     .resumen-porcentaje {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
-      gap: 12px;
+      gap: var(--espacio-3);
     }
     .porcentaje {
       color: var(--color-primario);
-      font-size: 24px;
+      font-size: var(--texto-xl);
       font-weight: 700;
     }
     .sesiones {
-      font-size: 13px;
+      font-size: var(--texto-sm);
     }
     .barra {
       height: 10px;
       overflow: hidden;
-      border-radius: 999px;
+      border-radius: var(--radio-pill);
       background: var(--color-fondo);
     }
     .progreso {
@@ -180,69 +174,12 @@ import {
       border-radius: inherit;
       background: var(--color-primario);
     }
-    .sin-sesiones,
-    .vacio {
-      color: var(--color-texto-suave);
-    }
     .sin-sesiones {
-      padding: 10px;
-      border-radius: 6px;
+      padding: var(--espacio-2);
+      border-radius: var(--radio-sm);
       background: var(--color-fondo);
+      color: var(--color-texto-suave);
       font-weight: 600;
-    }
-    .tabla-contenedor {
-      overflow-x: auto;
-      border: 1px solid var(--color-borde);
-      border-radius: 8px;
-      background: var(--color-superficie);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-    th,
-    td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--color-borde);
-      white-space: nowrap;
-    }
-    th {
-      color: var(--color-texto-suave);
-      font-size: 12px;
-      text-transform: uppercase;
-    }
-    tbody tr:last-child td {
-      border-bottom: 0;
-    }
-    .estado {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .estado-presente {
-      background: var(--color-primario-suave);
-      color: var(--color-primario);
-    }
-    .estado-tarde {
-      background: var(--color-advertencia-suave);
-      color: var(--color-advertencia);
-    }
-    .estado-ausente {
-      background: var(--color-error-suave);
-      color: var(--color-error);
-    }
-    .estado-justificado {
-      background: var(--color-fondo);
-      color: var(--color-texto-suave);
-    }
-    .error {
-      padding: 10px 14px;
-      border-radius: 6px;
-      background: var(--color-error-suave);
-      color: var(--color-error);
     }
     @media (max-width: 600px) {
       .encabezado {
@@ -295,7 +232,7 @@ export class HistorialEstudianteComponent implements OnInit {
   }
 
   claseEstado(estado: EstadoAsistencia): string {
-    return `estado-${estado.toLowerCase()}`;
+    return `badge-estado badge-estado--${estado.toLowerCase()}`;
   }
 
   private mensajeError(error: unknown): string {
