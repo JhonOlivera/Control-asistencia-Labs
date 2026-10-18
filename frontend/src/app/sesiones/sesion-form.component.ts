@@ -7,6 +7,8 @@ import { Laboratorio, LaboratorioService } from '../laboratorios/laboratorio.ser
 import { Curso, CursoService } from './curso.service';
 import { SesionesService } from './sesiones.service';
 
+type CampoSesion = 'curso' | 'laboratorio' | 'fecha' | 'hora' | 'tema';
+
 @Component({
   selector: 'app-sesion-form',
   imports: [FormsModule],
@@ -15,48 +17,91 @@ import { SesionesService } from './sesiones.service';
       <h1>Nueva sesión</h1>
 
       @if (error(); as error) {
-        <p class="error">{{ error }}</p>
+        <p class="mensaje-error" role="alert">{{ error }}</p>
       }
 
-      <form (ngSubmit)="guardar()">
+      <form class="card" (ngSubmit)="guardar()">
         <label>
           Curso
-          <select name="cursoId" [(ngModel)]="cursoId" required>
+          <select
+            name="cursoId"
+            [(ngModel)]="cursoId"
+            required
+            [class.campo-invalido]="campoInvalido('curso')"
+          >
             <option [ngValue]="null" disabled>Selecciona un curso</option>
             @for (curso of cursos(); track curso.id) {
               <option [ngValue]="curso.id">{{ curso.nombre }} ({{ curso.grupo }})</option>
             }
           </select>
+          @if (campoInvalido('curso')) {
+            <span class="texto-error-campo">Selecciona un curso.</span>
+          }
         </label>
 
         <label>
           Laboratorio
-          <select name="laboratorioId" [(ngModel)]="laboratorioId" required>
+          <select
+            name="laboratorioId"
+            [(ngModel)]="laboratorioId"
+            required
+            [class.campo-invalido]="campoInvalido('laboratorio')"
+          >
             <option [ngValue]="null" disabled>Selecciona un laboratorio</option>
             @for (laboratorio of laboratorios(); track laboratorio.id) {
               <option [ngValue]="laboratorio.id">{{ laboratorio.nombre }}</option>
             }
           </select>
+          @if (campoInvalido('laboratorio')) {
+            <span class="texto-error-campo">Selecciona un laboratorio.</span>
+          }
         </label>
 
         <label>
           Fecha
-          <input type="date" name="fecha" [(ngModel)]="fecha" required />
+          <input
+            type="date"
+            name="fecha"
+            [(ngModel)]="fecha"
+            required
+            [class.campo-invalido]="campoInvalido('fecha')"
+          />
+          @if (campoInvalido('fecha')) {
+            <span class="texto-error-campo">Indica la fecha.</span>
+          }
         </label>
 
         <label>
           Hora
-          <input type="time" name="hora" [(ngModel)]="hora" required />
+          <input
+            type="time"
+            name="hora"
+            [(ngModel)]="hora"
+            required
+            [class.campo-invalido]="campoInvalido('hora')"
+          />
+          @if (campoInvalido('hora')) {
+            <span class="texto-error-campo">Indica la hora.</span>
+          }
         </label>
 
         <label>
           Tema
-          <input type="text" name="tema" [(ngModel)]="tema" required />
+          <input
+            type="text"
+            name="tema"
+            [(ngModel)]="tema"
+            required
+            [class.campo-invalido]="campoInvalido('tema')"
+          />
+          @if (campoInvalido('tema')) {
+            <span class="texto-error-campo">Indica el tema de la sesión.</span>
+          }
         </label>
 
         <div class="acciones">
-          <button type="button" (click)="cancelar()">Cancelar</button>
-          <button type="submit" [disabled]="guardando()">
+          <button type="button" class="btn btn--secundario" (click)="cancelar()">Cancelar</button>
+          <button type="submit" class="btn" [disabled]="guardando()">
             {{ guardando() ? 'Guardando...' : 'Crear sesión' }}
           </button>
         </div>
@@ -66,70 +111,56 @@ import { SesionesService } from './sesiones.service';
   styles: `
     .sesion-form {
       display: grid;
-      gap: 16px;
+      gap: var(--espacio-4);
       max-width: 480px;
     }
     h1 {
       margin: 0;
-      font-size: 24px;
+      font-size: var(--texto-xl);
       color: var(--color-texto);
-    }
-    .error {
-      padding: 10px 14px;
-      border-radius: 6px;
-      background: var(--color-error-suave);
-      color: var(--color-error);
     }
     form {
       display: grid;
-      gap: 14px;
-      padding: 20px;
-      border: 1px solid var(--color-borde);
-      border-radius: 8px;
-      background: var(--color-superficie);
+      gap: var(--espacio-4);
     }
     label {
       display: grid;
-      gap: 6px;
+      gap: var(--espacio-1);
       color: var(--color-texto);
       font-weight: 600;
-      font-size: 14px;
+      font-size: var(--texto-sm);
     }
     select,
     input {
       min-height: 40px;
-      padding: 0 10px;
+      padding: 0 var(--espacio-3);
       border: 1px solid var(--color-borde);
-      border-radius: 4px;
+      border-radius: var(--radio-sm);
+      background: var(--color-superficie);
+      color: var(--color-texto);
       font: inherit;
+    }
+    .campo-invalido {
+      border-color: var(--color-error);
+    }
+    .texto-error-campo {
+      color: var(--color-error);
+      font-size: var(--texto-xs);
+      font-weight: 400;
     }
     .acciones {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
-      margin-top: 8px;
+      gap: var(--espacio-3);
+      margin-top: var(--espacio-2);
     }
-    .acciones button {
-      min-height: 40px;
-      padding: 0 16px;
-      border-radius: 4px;
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .acciones button[type='submit'] {
-      border: 1px solid var(--color-primario);
-      background: var(--color-primario);
-      color: var(--color-sobre-primario);
-    }
-    .acciones button[type='submit']:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .acciones button[type='button'] {
-      border: 1px solid var(--color-borde);
-      background: var(--color-superficie);
-      color: var(--color-texto);
+    @media (max-width: 480px) {
+      .acciones {
+        flex-direction: column-reverse;
+      }
+      .acciones .btn {
+        width: 100%;
+      }
     }
   `,
 })
@@ -145,6 +176,7 @@ export class SesionFormComponent implements OnInit {
   usuario = signal<UsuarioAutenticado | null>(null);
   error = signal<string | null>(null);
   guardando = signal(false);
+  camposInvalidos = signal<Set<CampoSesion>>(new Set());
 
   cursoId: number | null = null;
   laboratorioId: number | null = null;
@@ -170,8 +202,20 @@ export class SesionFormComponent implements OnInit {
     });
   }
 
+  campoInvalido(campo: CampoSesion): boolean {
+    return this.camposInvalidos().has(campo);
+  }
+
   guardar(): void {
-    if (!this.cursoId || !this.laboratorioId || !this.fecha || !this.hora || !this.tema.trim()) {
+    const invalidos = new Set<CampoSesion>();
+    if (!this.cursoId) invalidos.add('curso');
+    if (!this.laboratorioId) invalidos.add('laboratorio');
+    if (!this.fecha) invalidos.add('fecha');
+    if (!this.hora) invalidos.add('hora');
+    if (!this.tema.trim()) invalidos.add('tema');
+    this.camposInvalidos.set(invalidos);
+
+    if (invalidos.size > 0) {
       this.error.set('Completa todos los campos.');
       return;
     }
@@ -186,8 +230,8 @@ export class SesionFormComponent implements OnInit {
     this.guardando.set(true);
     this.sesionesService
       .crearSesion({
-        cursoId: this.cursoId,
-        laboratorioId: this.laboratorioId,
+        cursoId: this.cursoId!,
+        laboratorioId: this.laboratorioId!,
         administradorId,
         fecha: this.fecha,
         hora: this.hora,

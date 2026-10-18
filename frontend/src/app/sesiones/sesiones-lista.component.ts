@@ -1,129 +1,88 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { SesionResumen, SesionesService } from './sesiones.service';
 
 @Component({
   selector: 'app-sesiones-lista',
-  imports: [RouterLink],
   template: `
     <section class="sesiones-lista">
       <header class="encabezado">
         <h1>Sesiones</h1>
-        <button type="button" (click)="nuevaSesion()">Nueva sesión</button>
+        <button type="button" class="btn" (click)="nuevaSesion()">Nueva sesión</button>
       </header>
 
       @if (error(); as error) {
-        <p class="error">{{ error }}</p>
+        <p class="mensaje-error" role="alert">{{ error }}</p>
       }
 
       @if (cargando()) {
-        <p>Cargando sesiones...</p>
+        <p class="cargando">Cargando sesiones...</p>
       } @else if (sesiones().length === 0) {
-        <p>No hay sesiones registradas.</p>
+        <p class="estado-vacio">No hay sesiones registradas.</p>
       } @else {
-        <table>
-          <thead>
-            <tr>
-              <th>Curso</th>
-              <th>Laboratorio</th>
-              <th>Fecha</th>
-              <th>Hora</th>
-              <th>Estado</th>
-              <th>Marcaron</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (sesion of sesiones(); track sesion.id) {
-              <tr [routerLink]="['/panel/sesiones', sesion.id]">
-                <td>{{ sesion.cursoNombre }} ({{ sesion.cursoGrupo }})</td>
-                <td>{{ sesion.laboratorioNombre }}</td>
-                <td>{{ sesion.fecha }}</td>
-                <td>{{ sesion.hora }}</td>
-                <td>
-                  <span class="estado" [class.cerrada]="sesion.estado === 'CERRADA'">
-                    {{ sesion.estado }}
-                  </span>
-                </td>
-                <td>{{ sesion.estudiantesMarcados }}</td>
+        <div class="tabla-contenedor">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>Curso</th>
+                <th>Laboratorio</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Estado</th>
+                <th class="numero">Marcaron</th>
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (sesion of sesiones(); track sesion.id) {
+                <tr
+                  tabindex="0"
+                  role="link"
+                  [attr.aria-label]="'Ver detalle de la sesión de ' + sesion.cursoNombre"
+                  (click)="irDetalle(sesion.id)"
+                  (keydown.enter)="irDetalle(sesion.id)"
+                >
+                  <td data-label="Curso" class="col-curso">
+                    {{ sesion.cursoNombre }} ({{ sesion.cursoGrupo }})
+                  </td>
+                  <td data-label="Laboratorio">{{ sesion.laboratorioNombre }}</td>
+                  <td data-label="Fecha">{{ sesion.fecha }}</td>
+                  <td data-label="Hora">{{ sesion.hora }}</td>
+                  <td data-label="Estado">
+                    <span [class]="claseBadge(sesion.estado)">{{ sesion.estado }}</span>
+                  </td>
+                  <td data-label="Marcaron" class="numero">{{ sesion.estudiantesMarcados }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     </section>
   `,
   styles: `
     .sesiones-lista {
       display: grid;
-      gap: 16px;
+      gap: var(--espacio-4);
     }
     .encabezado {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: var(--espacio-3);
     }
     h1 {
       margin: 0;
-      font-size: 24px;
+      font-size: var(--texto-xl);
       color: var(--color-texto);
     }
-    .encabezado button {
-      min-height: 40px;
-      padding: 0 16px;
-      border: 1px solid var(--color-primario);
-      border-radius: 4px;
-      background: var(--color-primario);
-      color: var(--color-sobre-primario);
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .encabezado button:hover {
-      opacity: 0.9;
-    }
-    .error {
-      padding: 10px 14px;
-      border-radius: 6px;
-      background: var(--color-error-suave);
-      color: var(--color-error);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--color-superficie);
-      border: 1px solid var(--color-borde);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    th,
-    td {
-      padding: 10px 14px;
-      text-align: left;
-      border-bottom: 1px solid var(--color-borde);
-    }
-    th {
-      color: var(--color-texto-suave);
-      font-size: 12px;
-      text-transform: uppercase;
-    }
-    tbody tr {
-      cursor: pointer;
-    }
-    tbody tr:hover {
-      background: var(--color-fondo);
-    }
-    .estado {
-      padding: 2px 10px;
-      border-radius: 999px;
-      background: var(--color-primario-suave);
-      color: var(--color-primario);
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .estado.cerrada {
-      background: var(--color-fondo);
-      color: var(--color-texto-suave);
+    @media (min-width: 768px) {
+      .col-curso {
+        max-width: 260px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
   `,
 })
@@ -150,6 +109,14 @@ export class SesionesListaComponent implements OnInit {
 
   nuevaSesion(): void {
     this.router.navigate(['/panel/sesiones/nueva']);
+  }
+
+  irDetalle(id: number): void {
+    this.router.navigate(['/panel/sesiones', id]);
+  }
+
+  claseBadge(estado: SesionResumen['estado']): string {
+    return `badge-estado badge-estado--${estado.toLowerCase()}`;
   }
 
   private mensajeError(error: unknown): string {

@@ -7,20 +7,20 @@ import { ReportesService, ResumenReporte } from './reportes.service';
   template: `
     <section class="dashboard">
       @if (error(); as error) {
-        <p class="error">{{ error }}</p>
+        <p class="mensaje-error" role="alert">{{ error }}</p>
       } @else if (cargando()) {
-        <p>Cargando dashboard...</p>
+        <p class="cargando">Cargando dashboard...</p>
       } @else if (resumen(); as resumen) {
         <div class="tarjetas">
-          <div class="tarjeta">
+          <div class="card tarjeta">
             <span class="valor">{{ resumen.totalSesiones }}</span>
             <span class="etiqueta">Sesiones realizadas</span>
           </div>
-          <div class="tarjeta">
+          <div class="card tarjeta">
             <span class="valor">{{ resumen.asistenciaPromedio }}%</span>
             <span class="etiqueta">Asistencia promedio</span>
           </div>
-          <div class="tarjeta">
+          <div class="card tarjeta">
             <span class="valor">{{ resumen.totalEstudiantes }}</span>
             <span class="etiqueta">Total de estudiantes</span>
           </div>
@@ -30,37 +30,41 @@ import { ReportesService, ResumenReporte } from './reportes.service';
           <h2>Estudiantes en riesgo (menos de 80% de asistencia)</h2>
 
           @if (resumen.estudiantesEnRiesgo.length === 0) {
-            <p class="sin-riesgo">Ningún estudiante está por debajo del 80% de asistencia.</p>
+            <p class="estado-vacio">Ningún estudiante está por debajo del 80% de asistencia.</p>
           } @else {
-            <table>
-              <thead>
-                <tr>
-                  <th>Estudiante</th>
-                  <th>Código</th>
-                  <th>Curso</th>
-                  <th>Porcentaje</th>
-                  <th>Asistidas</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (estudiante of resumen.estudiantesEnRiesgo; track estudiante.id) {
+            <div class="tabla-contenedor">
+              <table class="tabla">
+                <thead>
                   <tr>
-                    <td>{{ estudiante.nombre }}</td>
-                    <td>{{ estudiante.codigo }}</td>
-                    <td>{{ estudiante.curso }}</td>
-                    <td>
-                      <div class="porcentaje">
-                        <div class="barra">
-                          <div class="relleno" [style.width.%]="estudiante.porcentaje"></div>
-                        </div>
-                        <span>{{ estudiante.porcentaje }}%</span>
-                      </div>
-                    </td>
-                    <td>{{ estudiante.sesionesAsistidas }} / {{ estudiante.sesionesTotales }}</td>
+                    <th>Estudiante</th>
+                    <th>Código</th>
+                    <th>Curso</th>
+                    <th>Porcentaje</th>
+                    <th class="numero">Asistidas</th>
                   </tr>
-                }
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  @for (estudiante of resumen.estudiantesEnRiesgo; track estudiante.id) {
+                    <tr>
+                      <td data-label="Estudiante">{{ estudiante.nombre }}</td>
+                      <td data-label="Código">{{ estudiante.codigo }}</td>
+                      <td data-label="Curso">{{ estudiante.curso }}</td>
+                      <td data-label="Porcentaje">
+                        <div class="porcentaje">
+                          <div class="barra">
+                            <div class="relleno" [style.width.%]="estudiante.porcentaje"></div>
+                          </div>
+                          <span>{{ estudiante.porcentaje }}%</span>
+                        </div>
+                      </td>
+                      <td data-label="Asistidas" class="numero">
+                        {{ estudiante.sesionesAsistidas }} / {{ estudiante.sesionesTotales }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           }
         </div>
       }
@@ -69,86 +73,54 @@ import { ReportesService, ResumenReporte } from './reportes.service';
   styles: `
     .dashboard {
       display: grid;
-      gap: 24px;
-    }
-    .error {
-      padding: 10px 14px;
-      border-radius: 6px;
-      background: var(--color-error-suave);
-      color: var(--color-error);
+      gap: var(--espacio-5);
     }
     .tarjetas {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--espacio-4);
     }
     .tarjeta {
       display: grid;
       gap: 4px;
-      padding: 20px;
-      border: 1px solid var(--color-borde);
-      border-radius: 8px;
-      background: var(--color-superficie);
     }
     .tarjeta .valor {
-      font-size: 32px;
+      font-size: var(--texto-2xl);
       font-weight: 700;
       color: var(--color-texto);
     }
     .tarjeta .etiqueta {
-      font-size: 13px;
+      font-size: var(--texto-sm);
       color: var(--color-texto-suave);
     }
     .riesgo h2 {
-      margin: 0 0 12px;
-      font-size: 18px;
+      margin: 0 0 var(--espacio-3);
+      font-size: var(--texto-lg);
       color: var(--color-texto);
-    }
-    .sin-riesgo {
-      margin: 0;
-      padding: 16px;
-      border: 1px solid var(--color-borde);
-      border-radius: 8px;
-      background: var(--color-primario-suave);
-      color: var(--color-primario);
-      font-weight: 600;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--color-superficie);
-      border: 1px solid var(--color-borde);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    th,
-    td {
-      padding: 10px 14px;
-      text-align: left;
-      border-bottom: 1px solid var(--color-borde);
-    }
-    th {
-      color: var(--color-texto-suave);
-      font-size: 12px;
-      text-transform: uppercase;
     }
     .porcentaje {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--espacio-2);
       min-width: 140px;
     }
     .barra {
       flex: 1;
       height: 8px;
-      border-radius: 999px;
+      border-radius: var(--radio-pill);
       background: var(--color-fondo);
       overflow: hidden;
     }
     .relleno {
       height: 100%;
-      border-radius: 999px;
+      border-radius: var(--radio-pill);
       background: var(--color-error);
+    }
+    @media (max-width: 767px) {
+      .porcentaje {
+        min-width: 0;
+        flex: 1;
+      }
     }
   `,
 })

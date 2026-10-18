@@ -11,7 +11,7 @@ const INTERVALO_ACTUALIZACION_MS = 10_000;
   template: `
     <section class="sesion-detalle">
       @if (error(); as error) {
-        <p class="error">{{ error }}</p>
+        <p class="mensaje-error" role="alert">{{ error }}</p>
       }
 
       @if (sesion(); as sesion) {
@@ -23,18 +23,16 @@ const INTERVALO_ACTUALIZACION_MS = 10_000;
               {{ sesion.tema }}
             </p>
           </div>
-          <span class="estado" [class.cerrada]="sesion.estado === 'CERRADA'">
-            {{ sesion.estado }}
-          </span>
+          <span [class]="claseBadge(sesion.estado)">{{ sesion.estado }}</span>
         </header>
 
         <div class="acciones">
-          <button type="button" (click)="enviarEnlaces()" [disabled]="enviando()">
+          <button type="button" class="btn" (click)="enviarEnlaces()" [disabled]="enviando()">
             {{ enviando() ? 'Enviando...' : 'Enviar enlaces' }}
           </button>
           <button
             type="button"
-            class="cerrar"
+            class="btn btn--peligro"
             (click)="cerrarSesion()"
             [disabled]="sesion.estado === 'CERRADA' || cerrando()"
           >
@@ -43,160 +41,97 @@ const INTERVALO_ACTUALIZACION_MS = 10_000;
         </div>
 
         @if (mensaje(); as mensaje) {
-          <p class="mensaje">{{ mensaje }}</p>
+          <p class="mensaje-exito">{{ mensaje }}</p>
         }
 
         <div class="contadores">
-          <div class="contador">
+          <div class="card contador">
             <span class="numero">{{ conteos().presentes }}</span>
             <span class="etiqueta">Presentes</span>
           </div>
-          <div class="contador">
+          <div class="card contador">
             <span class="numero">{{ conteos().tarde }}</span>
             <span class="etiqueta">Tarde</span>
           </div>
-          <div class="contador">
+          <div class="card contador">
             <span class="numero">{{ conteos().pendientes }}</span>
             <span class="etiqueta">Pendientes</span>
           </div>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Estudiante</th>
-              <th>Código</th>
-              <th>Correo</th>
-              <th>Estado</th>
-              <th>Hora de registro</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (asistencia of asistencias(); track asistencia.estudianteId) {
+        <div class="tabla-contenedor">
+          <table class="tabla">
+            <thead>
               <tr>
-                <td>{{ asistencia.nombre }}</td>
-                <td>{{ asistencia.codigo }}</td>
-                <td>{{ asistencia.correo }}</td>
-                <td>{{ asistencia.estado }}</td>
-                <td>{{ asistencia.horaRegistro ?? '—' }}</td>
+                <th>Estudiante</th>
+                <th>Código</th>
+                <th>Correo</th>
+                <th>Estado</th>
+                <th>Hora de registro</th>
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (asistencia of asistencias(); track asistencia.estudianteId) {
+                <tr>
+                  <td data-label="Estudiante">{{ asistencia.nombre }}</td>
+                  <td data-label="Código">{{ asistencia.codigo }}</td>
+                  <td data-label="Correo">{{ asistencia.correo }}</td>
+                  <td data-label="Estado">
+                    <span [class]="claseBadge(asistencia.estado)">{{ asistencia.estado }}</span>
+                  </td>
+                  <td data-label="Hora de registro">{{ asistencia.horaRegistro ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       } @else if (cargando()) {
-        <p>Cargando sesión...</p>
+        <p class="cargando">Cargando sesión...</p>
       }
     </section>
   `,
   styles: `
     .sesion-detalle {
       display: grid;
-      gap: 16px;
-    }
-    .error {
-      padding: 10px 14px;
-      border-radius: 6px;
-      background: var(--color-error-suave);
-      color: var(--color-error);
-    }
-    .mensaje {
-      padding: 10px 14px;
-      border-radius: 6px;
-      background: var(--color-primario-suave);
-      color: var(--color-primario);
+      gap: var(--espacio-4);
     }
     .encabezado {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 16px;
+      gap: var(--espacio-4);
     }
     h1 {
       margin: 0;
-      font-size: 22px;
+      font-size: var(--texto-xl);
       color: var(--color-texto);
     }
     .subtitulo {
-      margin: 4px 0 0;
-      color: var(--color-texto-suave);
-    }
-    .estado {
-      padding: 4px 12px;
-      border-radius: 999px;
-      background: var(--color-primario-suave);
-      color: var(--color-primario);
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .estado.cerrada {
-      background: var(--color-fondo);
+      margin: var(--espacio-1) 0 0;
       color: var(--color-texto-suave);
     }
     .acciones {
       display: flex;
-      gap: 10px;
-    }
-    .acciones button {
-      min-height: 40px;
-      padding: 0 16px;
-      border-radius: 4px;
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
-      border: 1px solid var(--color-primario);
-      background: var(--color-primario);
-      color: var(--color-sobre-primario);
-    }
-    .acciones button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .acciones button.cerrar {
-      border-color: var(--color-borde);
-      background: var(--color-superficie);
-      color: var(--color-texto);
+      flex-wrap: wrap;
+      gap: var(--espacio-3);
     }
     .contadores {
-      display: flex;
-      gap: 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: var(--espacio-3);
     }
     .contador {
       display: grid;
       gap: 2px;
-      padding: 12px 20px;
-      border: 1px solid var(--color-borde);
-      border-radius: 8px;
-      background: var(--color-superficie);
-      min-width: 100px;
     }
-    .numero {
-      font-size: 26px;
+    .contador .numero {
+      font-size: var(--texto-2xl);
       font-weight: 700;
       color: var(--color-texto);
     }
-    .etiqueta {
-      font-size: 12px;
+    .contador .etiqueta {
+      font-size: var(--texto-xs);
       color: var(--color-texto-suave);
-      text-transform: uppercase;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--color-superficie);
-      border: 1px solid var(--color-borde);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    th,
-    td {
-      padding: 10px 14px;
-      text-align: left;
-      border-bottom: 1px solid var(--color-borde);
-    }
-    th {
-      color: var(--color-texto-suave);
-      font-size: 12px;
       text-transform: uppercase;
     }
   `,
@@ -287,6 +222,10 @@ export class SesionDetalleComponent implements OnInit {
         this.error.set(this.mensajeError(error));
       },
     });
+  }
+
+  claseBadge(estado: string): string {
+    return `badge-estado badge-estado--${estado.toLowerCase()}`;
   }
 
   private cargarSesion(): void {
