@@ -1,36 +1,106 @@
 /* You can add global styles to this file, and also import other style files */
 
 :root {
-  --color-primario: #176b50;
-  --color-primario-suave: #d8ebe3;
-  --color-fondo: #f4f5ef;
+  /* Color: identidad azul institucional (Universidad de Ibagué), modo claro */
+  --color-primario: #1f4e9c;
+  --color-primario-hover: #173b78;
+  --color-primario-suave: #e6edf9;
+  --color-fondo: #f4f6fa;
   --color-superficie: #ffffff;
-  --color-borde: #d5dfd8;
-  --color-texto: #172b2a;
-  --color-texto-suave: #527c68;
-  --color-advertencia: #9a6b12;
-  --color-advertencia-suave: #f5ead1;
-  --color-error: #9b392f;
-  --color-error-suave: #f5ddd9;
-  /* Texto siempre claro sobre superficies de color sólido (botones primarios), igual en ambos temas. */
+  --color-borde: #dde3ee;
+  --color-texto: #14213d;
+  --color-texto-suave: #55617a;
+  --color-advertencia: #9a6400;
+  --color-advertencia-suave: #f6e8cf;
+  --color-error: #b3261e;
+  --color-error-suave: #f9ddda;
+  /* Texto sobre superficies de color sólido (botones primarios); se invierte en modo oscuro. */
   --color-sobre-primario: #ffffff;
+
+  /* Menú lateral y cabecera: siempre azul marino, independiente del tema claro/oscuro. */
+  --color-menu-fondo: #13254f;
+  --color-menu-texto: #ffffff;
+  --color-menu-texto-suave: #a9b8db;
+  --color-menu-activo: #1f3a6e;
+
+  /* Estados de asistencia */
+  --color-presente: #0e7c66;
+  --color-presente-suave: #dff3ec;
+  --color-tarde: var(--color-advertencia);
+  --color-tarde-suave: var(--color-advertencia-suave);
+  --color-ausente: var(--color-error);
+  --color-ausente-suave: var(--color-error-suave);
+  --color-justificado: #6b7280;
+  --color-justificado-suave: #e7e9ee;
+
+  /* Tipografía */
+  --fuente-base: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --texto-xs: 12px;
+  --texto-sm: 14px;
+  --texto-base: 16px;
+  --texto-lg: 18px;
+  --texto-xl: 22px;
+  --texto-2xl: 28px;
+
+  /* Espaciado (base 4px) */
+  --espacio-1: 4px;
+  --espacio-2: 8px;
+  --espacio-3: 12px;
+  --espacio-4: 16px;
+  --espacio-5: 24px;
+  --espacio-6: 32px;
+  --espacio-7: 48px;
+  --espacio-8: 64px;
+
+  /* Radios */
+  --radio-sm: 6px;
+  --radio-md: 10px;
+  --radio-pill: 999px;
+
+  /* Sombras */
+  --sombra-sm: 0 1px 2px rgba(20, 33, 61, 0.08), 0 1px 1px rgba(20, 33, 61, 0.04);
+  --sombra-md: 0 8px 24px rgba(20, 33, 61, 0.1);
 }
 
 :root[data-theme='dark'] {
-  --color-primario: #1f8f66;
-  --color-primario-suave: #123a2a;
-  --color-fondo: #0d1117;
-  --color-superficie: #161b22;
-  --color-borde: #30363d;
-  --color-texto: #e6edf3;
-  --color-texto-suave: #8b949e;
-  --color-advertencia: #d29922;
-  --color-advertencia-suave: #3a2e0f;
-  --color-error: #f85149;
+  --color-primario: #6fa3f0;
+  --color-primario-hover: #8fb9f4;
+  --color-primario-suave: #16264a;
+  --color-fondo: #0a1226;
+  --color-superficie: #111c3a;
+  --color-borde: #223157;
+  --color-texto: #e8edf7;
+  --color-texto-suave: #9fb0cf;
+  --color-advertencia: #e0a530;
+  --color-advertencia-suave: #3a2e10;
+  --color-error: #f2534b;
   --color-error-suave: #3a1618;
+  /* Sobre un primario claro (#6fa3f0), el texto oscuro es el que cumple contraste AA. */
+  --color-sobre-primario: #0a1226;
+
+  --color-menu-fondo: #0d1731;
+  --color-menu-activo: #1a2c57;
+
+  --color-presente: #2fae8b;
+  --color-presente-suave: #123b30;
+  --color-justificado: #9aa3b2;
+  --color-justificado-suave: #1e2636;
+
+  --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+  --sombra-md: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 body {
+  margin: 0;
   background: var(--color-fondo);
   color: var(--color-texto);
+  font-family: var(--fuente-base);
+  font-size: var(--texto-base);
+  line-height: 1.5;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+  border-radius: var(--radio-sm);
 }

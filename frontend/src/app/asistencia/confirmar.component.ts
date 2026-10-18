@@ -75,7 +75,7 @@ const MENSAJE_ERROR_GENERICO =
       border: 1px solid var(--color-borde);
       border-radius: 16px;
       padding: 32px 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--sombra-md);
     }
     .titulo {
       margin: 0 0 8px;

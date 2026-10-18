@@ -28,12 +28,7 @@ export class ThemeService {
       return atributoActual;
     }
 
-    const guardado = this.leerTemaGuardado();
-    if (guardado) {
-      return guardado;
-    }
-
-    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return this.leerTemaGuardado() ?? 'light';
   }
 
   private leerTemaGuardado(): Tema | null {
