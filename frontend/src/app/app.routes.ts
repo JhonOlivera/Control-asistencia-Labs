@@ -62,8 +62,8 @@ export const routes: Routes = [
 			{
 				path: 'estudiantes',
 				loadComponent: () =>
-					import('./layout/en-construccion.component').then(
-						(module) => module.EnConstruccionComponent,
+					import('./estudiantes/estudiantes.component').then(
+						(module) => module.EstudiantesComponent,
 					),
 			},
 			{
