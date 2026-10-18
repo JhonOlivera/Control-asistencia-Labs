@@ -1,71 +1,138 @@
-# 📋 Control de Asistencia en Laboratorios
+# Sistema de Control de Asistencia en los Laboratorios
 
-Sistema web para el registro y seguimiento de asistencia a prácticas de laboratorio en la Universidad de Ibagué, pensado como reemplazo de las listas físicas y planillas de Excel que se usan actualmente.
+Proyecto de Ingeniería de Software — Universidad de Ibagué.
 
----
+Aplicación web para registrar la asistencia a las sesiones de laboratorio. El foco del sistema es el **laboratorio**: el encargado abre una sesión, el sistema envía un enlace único por correo a los estudiantes del curso y cada estudiante confirma su asistencia con un solo clic, **sin iniciar sesión**.
 
-## 🧭 Descripción del proyecto
+- **Wiki (documentación, diagramas y gestión de riesgos y de la configuración):** https://github.com/JhonOlivera/Control-asistencia-Labs/wiki
+- **Frontend desplegado:** https://control-asistencia-labs.vercel.app
+- **Backend desplegado:** https://control-asistencia-api-e8u5.onrender.com
 
-Actualmente, el control de asistencia a las prácticas de laboratorio se hace de forma manual: listas físicas o archivos de Excel que dificultan el seguimiento, la generación de reportes y la trazabilidad de los registros. Este proyecto busca digitalizar ese proceso mediante una aplicación web centrada en el **laboratorio**, no en el docente, donde:
+> **Nota sobre el arranque en frío:** el backend está en el plan gratuito de Render y se duerme tras unos 15 minutos sin uso. La primera petición puede tardar hasta ~90 segundos. Conviene abrir la URL del backend unos minutos antes de una demostración.
 
-- El **estudiante** recibe un correo con un enlace único al abrirse la sesión, y con un solo clic marca su propia asistencia — sin iniciar sesión ni llenar ningún formulario.
-- El **administrador del sistema** (encargado del laboratorio) abre y cierra las sesiones, gestiona estudiantes y laboratorios, y corrige registros cuando sea necesario.
-- El **docente** puede iniciar sesión para consultar reportes de sus cursos.
-- La **coordinación académica** recibe alertas automáticas y reportes consolidados, sin operar el día a día del sistema.
+## Cómo funciona
 
-## ✨ Funcionalidades principales
+1. El **administrador** (encargado del laboratorio) inicia sesión con Google y abre una sesión de laboratorio (curso, laboratorio, fecha y hora).
+2. El sistema valida el horario del laboratorio, su capacidad y que no exista otra sesión abierta en el mismo horario.
+3. El sistema envía por correo un **enlace único** a cada estudiante activo matriculado en el curso.
+4. El **estudiante** hace clic en su enlace y el sistema registra su asistencia como *presente* o *tarde*. No necesita cuenta ni contraseña.
+5. El administrador cierra la sesión y consulta quién asistió.
 
-- 🔐 Autenticación por rol, solo para Administrador y Docente (el estudiante no requiere cuenta)
-- ✉️ Registro de asistencia mediante enlace único enviado por correo (un clic, sin formularios)
-- 📊 Historial de asistencia por estudiante, con porcentaje acumulado
-- 📝 Generación de reportes de asistencia filtrables por curso, docente y fecha
-- ⚠️ Alertas automáticas por baja asistencia, tanto para el estudiante como para coordinación
-- ✅ Justificación de inasistencias con soporte adjunto y aprobación del administrador
-- 🛠️ Corrección de registros de asistencia dentro de una ventana de tiempo definida
-- ⚙️ Configuración de laboratorios, capacidad y horarios disponibles
-- 🧾 Trazabilidad completa: toda edición queda auditada (usuario, fecha, valor anterior y nuevo)
+## Estado del proyecto (Avance 2)
 
-## 🏗️ Stack tecnológico
+Funcionalidad estimada: **≈ 50 %** de las historias de usuario (3 completas, 4 parciales, 3 pendientes).
 
-| Componente           | Tecnología               |
-| --------------------- | ------------------------ |
-| Backend               | Java · Spring Boot       |
-| Frontend              | Angular (TypeScript)     |
-| Base de datos         | MySQL (alojada en Aiven) |
-| Control de versiones  | Git / GitHub             |
-| Diseño / prototipado  | Figma / draw.io          |
+| HU | Historia | Estado |
+|----|----------|--------|
+| HU01 | Registrar asistencia (por enlace de correo) | Parcial |
+| HU02 | Consultar historial de asistencia | Parcial |
+| HU03 | Registrar una nueva sesión de laboratorio | Cumple |
+| HU04 | Generar reporte de asistencia | Parcial |
+| HU05 | Gestionar estudiantes | Cumple |
+| HU06 | Alerta de riesgo por baja asistencia | Parcial |
+| HU07 | Justificar una inasistencia | Pendiente |
+| HU08 | Corregir un registro con auditoría | Pendiente |
+| HU09 | Configurar laboratorios y horarios | Cumple |
+| HU10 | Alertas automáticas a coordinación | Pendiente |
 
-## 📐 Requerimientos no funcionales
+**Limitaciones conocidas**
 
-El proyecto sigue los lineamientos de calidad de software definidos en la norma **ISO/IEC 25010**, cubriendo aspectos como:
+- La matrícula de estudiantes en cursos se carga con datos iniciales; todavía no hay una pantalla para matricularlos.
+- No hay diferenciación de permisos por rol: cualquier usuario autenticado (administrador o docente) accede a las mismas pantallas.
+- No hay envío automático de alertas por bajo porcentaje de asistencia.
+- En el servidor gratuito de producción el correo saliente (SMTP) puede estar restringido; el envío de correos funciona en el entorno local.
 
-- **Fiabilidad** — respaldo periódico de datos ante fallos
-- **Seguridad** — solo usuarios autenticados (Administrador, Docente) pueden acceder al panel de gestión
-- **Trazabilidad** — auditoría completa de cada edición realizada sobre un registro de asistencia
+El detalle de cada historia, los criterios de aceptación y los diagramas están en la [Wiki](https://github.com/JhonOlivera/Control-asistencia-Labs/wiki).
 
-## 👥 Roles del sistema
+## Tecnologías
 
-- **Estudiante** — marca su asistencia con un clic desde el correo, consulta su historial y justifica inasistencias (sin necesidad de iniciar sesión)
-- **Administrador del sistema (encargado de laboratorio)** — abre/cierra sesiones, gestiona estudiantes y laboratorios, corrige registros
-- **Docente** — inicia sesión para consultar reportes de sus cursos
-- **Coordinación académica** — consulta reportes consolidados y recibe alertas automáticas
+| Capa | Tecnología |
+|------|------------|
+| Backend | Java 25, Spring Boot 4.1, Spring Security (Google OAuth2 + JWT), JPA/Hibernate, Spring Mail, Lombok |
+| Frontend | Angular 22 (componentes standalone), TypeScript, SCSS |
+| Base de datos | MySQL (Aiven en producción) |
+| Despliegue | Render (backend, Docker), Vercel (frontend), Aiven (base de datos) |
 
-## 📌 Estado del proyecto
+## Estructura del repositorio
 
-🚧 En desarrollo — Avance 1 corregido tras retroalimentación del profesor (enfoque reorientado al laboratorio). Backend: modelo de datos y repositorios listos, servicios en construcción. Frontend: setup inicial en curso.
+```
+backend/    API REST con Spring Boot (Dockerfile incluido)
+frontend/   Aplicación Angular (vercel.json para el despliegue)
+docs/       Documentación técnica y mock-up navegable
+```
 
-## 📂 Documentación
+## Ejecución en local
 
-Consulta la [Wiki del repositorio](https://github.com/JhonOlivera/Control-asistencia-Labs/wiki) para ver el detalle completo del avance, las historias de usuario y los diagramas del proyecto.
+### Requisitos
 
-## 👥 Equipo
+- JDK 25
+- Node.js y npm
+- Una base de datos MySQL accesible (local o en la nube)
+- Credenciales de Google OAuth2 y de una cuenta de correo con contraseña de aplicación
 
-- **Jhon Edwin Olivera Duarte**
-- **Sebastian Rodriguez Martinez**
-- **Juan Andres Bejarano Garzon**
+### Backend
 
-Estudiantes de Ingeniería de Sistemas — Universidad de Ibagué
+1. Define las variables de entorno de la tabla de abajo (por ejemplo, en la configuración de ejecución de tu IDE).
+2. Desde la carpeta `backend/`:
 
----
+```bash
+./mvnw spring-boot:run
+```
 
-Proyecto académico — Universidad de Ibagué
+El backend queda en `http://localhost:8080`. Al arrancar crea las tablas y carga los datos iniciales.
+
+### Frontend
+
+Desde la carpeta `frontend/`:
+
+```bash
+npm install
+npm start
+```
+
+La aplicación queda en `http://localhost:4200` y, al estar en `localhost`, usa el backend local.
+
+## Variables de entorno
+
+El proyecto no guarda ninguna credencial en el repositorio: todo lo sensible se lee de variables de entorno. **Nunca subas sus valores.**
+
+| Variable | Para qué sirve |
+|----------|----------------|
+| `DB_HOST` | Servidor de la base de datos |
+| `DB_PORT` | Puerto de la base de datos |
+| `DB_NAME` | Nombre de la base de datos |
+| `DB_USER` | Usuario de la base de datos |
+| `DB_PASSWORD` | Contraseña de la base de datos |
+| `MAIL_USERNAME` | Cuenta de correo que envía los enlaces de asistencia |
+| `MAIL_PASSWORD` | Contraseña de aplicación de esa cuenta de correo |
+| `GOOGLE_CLIENT_ID` | Identificador del cliente de Google OAuth2 |
+| `GOOGLE_CLIENT_SECRET` | Secreto del cliente de Google OAuth2 |
+| `JWT_SECRET` | Clave con la que se firman los tokens de sesión |
+| `FRONTEND_URL` | URL del frontend permitida en CORS y usada en la redirección tras el login (por defecto `http://localhost:4200`) |
+
+En producción estas variables se configuran en Render (backend) y la URL del frontend en Vercel.
+
+## Pruebas
+
+Desde `backend/`:
+
+```bash
+./mvnw test
+```
+
+Las pruebas de la capa de servicio (por ejemplo, sesiones y estudiantes) se ejecutan sin base de datos. La prueba de arranque completo de la aplicación necesita las variables de entorno y una base de datos disponibles.
+
+## Flujo de trabajo del equipo
+
+- **GitHub Flow:** `main` siempre estable; cada tarea en una rama propia (`feature/...`, `fix/...`, `docs/...`).
+- Los cambios llegan a `main` **solo por Pull Request**, con al menos una aprobación de otro integrante, y se fusionan con *merge commit*.
+- **Conventional Commits** en español: `feat(estudiantes): agregar API de gestión de estudiantes (HU05)`.
+- Cada integrante hace sus commits con su propia cuenta de GitHub.
+
+Más detalle en la página *Gestión de la Configuración* de la Wiki.
+
+## Equipo
+
+- Jhon Edwin Olivera Duarte
+- Juan Andrés Bejarano Garzón
+- Sebastián Rodríguez
