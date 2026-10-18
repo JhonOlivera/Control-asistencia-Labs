@@ -13,6 +13,8 @@ import org.springframework.data.repository.query.Param;
 public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     boolean existsByEstudianteIdAndSesionId(Long estudianteId, Long sesionId);
 
+    boolean existsByEstudianteId(Long estudianteId);
+
     @Query("""
             select a.estudiante.id as estudianteId, a.sesion.curso.id as cursoId, count(a) as total
             from Asistencia a
