@@ -9,20 +9,20 @@ import { AuthService, UsuarioAutenticado } from '../core/auth.service';
         <h1>Hola, {{ usuario.nombre }}</h1>
         <p>Bienvenido al panel de control de asistencia.</p>
       } @else if (error()) {
-        <h1>No se pudo cargar tu información</h1>
+        <p class="mensaje-error" role="alert">No se pudo cargar tu información.</p>
       } @else {
-        <p>Cargando...</p>
+        <p class="cargando">Cargando...</p>
       }
     </section>
   `,
   styles: `
     .inicio {
       display: grid;
-      gap: 8px;
+      gap: var(--espacio-2);
     }
     h1 {
       margin: 0;
-      font-size: 26px;
+      font-size: var(--texto-xl);
       color: var(--color-texto);
     }
     p {
