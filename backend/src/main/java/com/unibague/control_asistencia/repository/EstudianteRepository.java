@@ -14,4 +14,13 @@ public interface EstudianteRepository extends JpaRepository<Estudiante, Long> {
 
     @Query("select e from Estudiante e join e.cursos c where c.id = :cursoId and e.activo = true")
     List<Estudiante> findActivosByCursoId(@Param("cursoId") Long cursoId);
+
+    @Query("""
+            select e from Estudiante e
+            where (:texto is null
+                or lower(e.nombre) like lower(concat('%', :texto, '%'))
+                or lower(e.codigo) like lower(concat('%', :texto, '%')))
+            and (:activo is null or e.activo = :activo)
+            """)
+    List<Estudiante> buscar(@Param("texto") String texto, @Param("activo") Boolean activo);
 }
