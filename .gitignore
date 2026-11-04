@@ -152,3 +152,8 @@ Thumbs.db
 
 # Configuración local de Claude Code (no compartida con el equipo)
 .claude/settings.local.json
+
+# Archivos de importación de estudiantes con datos reales (HU11): no se suben al repositorio.
+backend/**/*.xlsx
+backend/**/*.csv
+!backend/src/test/resources/plantillas/**
