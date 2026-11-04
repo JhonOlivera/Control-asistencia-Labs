@@ -72,6 +72,13 @@ export const routes: Routes = [
 					),
 			},
 			{
+				path: 'importar',
+				loadComponent: () =>
+					import('./importar/importar-estudiantes.component').then(
+						(module) => module.ImportarEstudiantesComponent,
+					),
+			},
+			{
 				path: 'dashboard',
 				loadComponent: () =>
 					import('./dashboard/dashboard.component').then((module) => module.DashboardComponent),
