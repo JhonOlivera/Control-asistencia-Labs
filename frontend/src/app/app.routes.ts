@@ -60,6 +60,11 @@ export const routes: Routes = [
 					),
 			},
 			{
+				path: 'horarios',
+				loadComponent: () =>
+					import('./horarios/horarios.component').then((module) => module.HorariosComponent),
+			},
+			{
 				path: 'estudiantes',
 				loadComponent: () =>
 					import('./estudiantes/estudiantes.component').then(
