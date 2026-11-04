@@ -1,6 +1,11 @@
 package com.unibague.control_asistencia.service;
 
 import com.unibague.control_asistencia.dto.AsistenciaEstudianteDto;
+import com.unibague.control_asistencia.dto.ExportacionCsvDto;
+import com.unibague.control_asistencia.dto.ParticipanteDto;
+import com.unibague.control_asistencia.dto.ResumenParticipantesDto;
+import com.unibague.control_asistencia.dto.SesionParticipantesResponseDto;
+import com.unibague.control_asistencia.dto.SesionPorFechaDto;
 import com.unibague.control_asistencia.dto.SesionRequestDto;
 import com.unibague.control_asistencia.dto.SesionResponseDto;
 import com.unibague.control_asistencia.dto.SesionResumenDto;
@@ -21,6 +26,10 @@ import com.unibague.control_asistencia.repository.CursoRepository;
 import com.unibague.control_asistencia.repository.EstudianteRepository;
 import com.unibague.control_asistencia.repository.LaboratorioRepository;
 import com.unibague.control_asistencia.repository.SesionRepository;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,6 +43,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +53,8 @@ public class SesionService {
 
     private static final Pattern HORARIO_PATTERN = Pattern.compile("^([A-Z]{3})-([A-Z]{3})\\s+(\\d{2}:\\d{2})-(\\d{2}:\\d{2})$");
     private static final String ESTADO_PENDIENTE = "PENDIENTE";
+    private static final String ESTADO_MATRICULA_ACTIVA = "ACTIVA";
+    private static final String ESTADO_MATRICULA_INACTIVA = "INACTIVA";
     private static final Map<String, Integer> DIAS_MAP = Map.of(
             "LUN", 1,
             "MAR", 2,
@@ -74,7 +87,9 @@ public class SesionService {
     }
 
     @Transactional(readOnly = true)
-    public List<SesionResumenDto> listarSesiones() {
+    public List<SesionResumenDto> listarSesiones(String estadoFiltro, LocalDate fechaFiltro) {
+        EstadoSesion estado = parseEstadoSesion(estadoFiltro);
+
         Map<Long, Long> marcadosPorSesion = asistenciaRepository
                 .contarPorSesion(List.of(EstadoAsistencia.PRESENTE, EstadoAsistencia.TARDE))
                 .stream()
@@ -84,6 +99,8 @@ public class SesionService {
                 ));
 
         return sesionRepository.findAllByOrderByFechaDescHoraDescIdDesc().stream()
+                .filter(sesion -> estado == null || sesion.getEstado() == estado)
+                .filter(sesion -> fechaFiltro == null || sesion.getFecha().equals(fechaFiltro))
                 .map(sesion -> new SesionResumenDto(
                         sesion.getId(),
                         sesion.getCurso().getId(),
@@ -121,6 +138,138 @@ public class SesionService {
 
         resultado.sort(Comparator.comparing(AsistenciaEstudianteDto::nombre, String.CASE_INSENSITIVE_ORDER));
         return resultado;
+    }
+
+    @Transactional(readOnly = true)
+    public SesionParticipantesResponseDto obtenerParticipantes(Long sesionId, String asistenciaFiltro, String matriculaFiltro) {
+        Sesion sesion = sesionRepository.findById(sesionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sesión no encontrada con id " + sesionId));
+
+        List<ParticipanteDto> todos = construirParticipantes(sesion);
+        ResumenParticipantesDto resumen = new ResumenParticipantesDto(
+                todos.size(),
+                contarPorAsistencia(todos, EstadoAsistencia.PRESENTE),
+                contarPorAsistencia(todos, EstadoAsistencia.TARDE),
+                contarPorAsistencia(todos, EstadoAsistencia.AUSENTE)
+        );
+
+        List<ParticipanteDto> filtrados = todos.stream()
+                .filter(p -> asistenciaFiltro == null || asistenciaFiltro.isBlank()
+                        || p.asistencia().equalsIgnoreCase(asistenciaFiltro.trim()))
+                .filter(p -> matriculaFiltro == null || matriculaFiltro.isBlank()
+                        || p.estadoMatricula().equalsIgnoreCase(matriculaFiltro.trim()))
+                .sorted(Comparator.comparing(ParticipanteDto::nombre, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+
+        return new SesionParticipantesResponseDto(
+                sesion.getId(),
+                sesion.getCurso().getId(),
+                sesion.getCurso().getNombre(),
+                sesion.getCurso().getGrupo(),
+                sesion.getLaboratorio().getId(),
+                sesion.getLaboratorio().getNombre(),
+                sesion.getFecha(),
+                sesion.getHora(),
+                sesion.getEstado().name(),
+                resumen,
+                filtrados
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<SesionPorFechaDto> listarPorFecha(LocalDate fecha) {
+        return sesionRepository.findByFechaOrderByHoraAscIdAsc(fecha).stream()
+                .map(sesion -> {
+                    List<ParticipanteDto> participantes = construirParticipantes(sesion);
+                    return new SesionPorFechaDto(
+                            sesion.getId(),
+                            sesion.getCurso().getId(),
+                            sesion.getCurso().getNombre(),
+                            sesion.getCurso().getGrupo(),
+                            sesion.getLaboratorio().getId(),
+                            sesion.getLaboratorio().getNombre(),
+                            sesion.getFecha(),
+                            sesion.getHora(),
+                            sesion.getEstado().name(),
+                            contarPorAsistencia(participantes, EstadoAsistencia.PRESENTE),
+                            contarPorAsistencia(participantes, EstadoAsistencia.TARDE),
+                            contarPorAsistencia(participantes, EstadoAsistencia.AUSENTE)
+                    );
+                })
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ExportacionCsvDto exportarParticipantesCsv(Long sesionId, boolean incluirAusentes) {
+        Sesion sesion = sesionRepository.findById(sesionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sesión no encontrada con id " + sesionId));
+
+        List<ParticipanteDto> participantes = construirParticipantes(sesion).stream()
+                .filter(p -> incluirAusentes || !p.asistencia().equals(EstadoAsistencia.AUSENTE.name()))
+                .sorted(Comparator.comparing(ParticipanteDto::nombre, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+
+        StringWriter writer = new StringWriter();
+        writer.write('﻿');
+        try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
+                .setHeader("codigo", "nombre", "estado", "horaRegistro")
+                .get())) {
+            for (ParticipanteDto participante : participantes) {
+                printer.printRecord(
+                        participante.codigo(),
+                        participante.nombre(),
+                        participante.asistencia(),
+                        participante.horaRegistro() == null ? "" : participante.horaRegistro().toString()
+                );
+            }
+        } catch (IOException e) {
+            throw new ValidacionSesionException("No se pudo generar el archivo CSV de asistencia.");
+        }
+
+        String nombreArchivo = "asistencia-" + sanitizarParaArchivo(sesion.getCurso().getNombre())
+                + "-" + sanitizarParaArchivo(sesion.getCurso().getGrupo())
+                + "-" + sesion.getFecha() + ".csv";
+
+        return new ExportacionCsvDto(nombreArchivo, writer.toString().getBytes(StandardCharsets.UTF_8));
+    }
+
+    private List<ParticipanteDto> construirParticipantes(Sesion sesion) {
+        Map<Long, Asistencia> asistenciaPorEstudiante = asistenciaRepository.findBySesionId(sesion.getId()).stream()
+                .collect(Collectors.toMap(asistencia -> asistencia.getEstudiante().getId(), Function.identity()));
+
+        return estudianteRepository.findByCursoId(sesion.getCurso().getId()).stream()
+                .map(estudiante -> {
+                    Asistencia asistencia = asistenciaPorEstudiante.get(estudiante.getId());
+                    String estadoAsistencia = asistencia != null
+                            ? asistencia.getEstado().name()
+                            : EstadoAsistencia.AUSENTE.name();
+                    LocalDateTime horaRegistro = asistencia != null ? asistencia.getHoraRegistro() : null;
+                    String estadoMatricula = estudiante.isActivo() ? ESTADO_MATRICULA_ACTIVA : ESTADO_MATRICULA_INACTIVA;
+
+                    return new ParticipanteDto(estudiante.getId(), estudiante.getCodigo(), estudiante.getNombre(),
+                            estudiante.getCorreo(), estadoMatricula, estadoAsistencia, horaRegistro);
+                })
+                .toList();
+    }
+
+    private long contarPorAsistencia(List<ParticipanteDto> participantes, EstadoAsistencia estado) {
+        return participantes.stream().filter(p -> p.asistencia().equals(estado.name())).count();
+    }
+
+    private EstadoSesion parseEstadoSesion(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+        try {
+            return EstadoSesion.valueOf(valor.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ValidacionSesionException("El estado debe ser ABIERTA o CERRADA.");
+        }
+    }
+
+    private String sanitizarParaArchivo(String texto) {
+        String sinTildes = Normalizer.normalize(texto, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return sinTildes.replaceAll("[^A-Za-z0-9]+", "-").replaceAll("^-+|-+$", "");
     }
 
     @Transactional

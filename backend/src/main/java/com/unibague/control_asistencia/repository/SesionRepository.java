@@ -28,6 +28,9 @@ public interface SesionRepository extends JpaRepository<Sesion, Long> {
     @EntityGraph(attributePaths = {"curso", "laboratorio"})
     List<Sesion> findAllByOrderByFechaDescHoraDescIdDesc();
 
+    @EntityGraph(attributePaths = {"curso", "laboratorio"})
+    List<Sesion> findByFechaOrderByHoraAscIdAsc(LocalDate fecha);
+
     interface ConteoPorCurso {
         Long getCursoId();
         Long getTotal();
