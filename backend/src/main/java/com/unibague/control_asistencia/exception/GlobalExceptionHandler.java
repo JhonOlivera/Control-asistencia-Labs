@@ -25,6 +25,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(ValidacionHorarioGrupoException.class)
+    public ResponseEntity<ErrorResponse> handleValidacionHorarioGrupo(ValidacionHorarioGrupoException ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ConflictoHorarioGrupoException.class)
+    public ResponseEntity<ErrorResponse> handleConflictoHorarioGrupo(ConflictoHorarioGrupoException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ex.getMessage()));
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(ex.getMessage()));
