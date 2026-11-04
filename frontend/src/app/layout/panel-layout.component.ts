@@ -28,6 +28,7 @@ const ITEMS_MENU: ItemMenu[] = [
   { etiqueta: 'Laboratorios', ruta: '/panel/laboratorios' },
   { etiqueta: 'Horarios', ruta: '/panel/horarios' },
   { etiqueta: 'Estudiantes', ruta: '/panel/estudiantes' },
+  { etiqueta: 'Importar estudiantes', ruta: '/panel/importar' },
   { etiqueta: 'Dashboard', ruta: '/panel/dashboard' },
 ];
 
