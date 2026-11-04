@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { apiUrl } from '../core/environment';
@@ -15,6 +15,62 @@ export interface SesionResumen {
   tema: string;
   estado: 'ABIERTA' | 'CERRADA';
   estudiantesMarcados: number;
+}
+
+export interface FiltroSesiones {
+  estado?: 'ABIERTA' | 'CERRADA';
+  fecha?: string;
+}
+
+export interface SesionPorFecha {
+  sesionId: number;
+  cursoId: number;
+  cursoNombre: string;
+  cursoGrupo: string;
+  laboratorioId: number;
+  laboratorioNombre: string;
+  fecha: string;
+  horaInicio: string;
+  estado: 'ABIERTA' | 'CERRADA';
+  presentes: number;
+  tarde: number;
+  ausentes: number;
+}
+
+export interface ResumenParticipantes {
+  matriculados: number;
+  presentes: number;
+  tarde: number;
+  ausentes: number;
+}
+
+export interface Participante {
+  estudianteId: number;
+  codigo: string;
+  nombre: string;
+  correo: string;
+  estadoMatricula: 'ACTIVA' | 'INACTIVA';
+  asistencia: 'PRESENTE' | 'TARDE' | 'AUSENTE';
+  horaRegistro: string | null;
+}
+
+export interface SesionParticipantesResponse {
+  sesionId: number;
+  cursoId: number;
+  cursoNombre: string;
+  cursoGrupo: string;
+  laboratorioId: number;
+  laboratorioNombre: string;
+  fecha: string;
+  horaInicio: string;
+  estado: 'ABIERTA' | 'CERRADA';
+  resumen: ResumenParticipantes;
+  participantes: Participante[];
+}
+
+export interface FiltroParticipantes {
+  asistencia?: 'PRESENTE' | 'TARDE' | 'AUSENTE';
+  matricula?: 'ACTIVA' | 'INACTIVA';
 }
 
 export interface SesionRequest {
@@ -50,8 +106,46 @@ export interface AsistenciaEstudiante {
 export class SesionesService {
   private readonly http = inject(HttpClient);
 
-  listarSesiones(): Observable<SesionResumen[]> {
-    return this.http.get<SesionResumen[]>(`${apiUrl}/sesiones`);
+  listarSesiones(filtro?: FiltroSesiones): Observable<SesionResumen[]> {
+    let params = new HttpParams();
+    if (filtro?.estado) {
+      params = params.set('estado', filtro.estado);
+    }
+    if (filtro?.fecha) {
+      params = params.set('fecha', filtro.fecha);
+    }
+    return this.http.get<SesionResumen[]>(`${apiUrl}/sesiones`, { params });
+  }
+
+  listarPorFecha(fecha: string): Observable<SesionPorFecha[]> {
+    const params = new HttpParams().set('fecha', fecha);
+    return this.http.get<SesionPorFecha[]>(`${apiUrl}/sesiones/por-fecha`, { params });
+  }
+
+  obtenerParticipantes(
+    sesionId: number,
+    filtro?: FiltroParticipantes,
+  ): Observable<SesionParticipantesResponse> {
+    let params = new HttpParams();
+    if (filtro?.asistencia) {
+      params = params.set('asistencia', filtro.asistencia);
+    }
+    if (filtro?.matricula) {
+      params = params.set('matricula', filtro.matricula);
+    }
+    return this.http.get<SesionParticipantesResponse>(
+      `${apiUrl}/sesiones/${sesionId}/participantes`,
+      { params },
+    );
+  }
+
+  descargarParticipantes(sesionId: number, incluirAusentes: boolean): Observable<HttpResponse<Blob>> {
+    const params = new HttpParams().set('incluirAusentes', incluirAusentes);
+    return this.http.get(`${apiUrl}/sesiones/${sesionId}/participantes/exportar`, {
+      params,
+      responseType: 'blob',
+      observe: 'response',
+    });
   }
 
   crearSesion(request: SesionRequest): Observable<SesionResponse> {

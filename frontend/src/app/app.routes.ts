@@ -53,6 +53,13 @@ export const routes: Routes = [
 					),
 			},
 			{
+				path: 'sesiones/:id/participantes',
+				loadComponent: () =>
+					import('./sesiones/sesion-participantes.component').then(
+						(module) => module.SesionParticipantesComponent,
+					),
+			},
+			{
 				path: 'laboratorios',
 				loadComponent: () =>
 					import('./laboratorios/laboratorios.component').then(
