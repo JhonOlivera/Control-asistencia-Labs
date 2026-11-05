@@ -18,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -92,6 +93,12 @@ public class SesionController {
     public ResponseEntity<SesionResponseDto> cerrarSesion(@PathVariable Long id) {
         SesionResponseDto response = sesionService.cerrarSesion(id);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarSesion(@PathVariable Long id) {
+        sesionService.eliminarSesion(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/enviar-enlaces")

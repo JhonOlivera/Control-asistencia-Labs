@@ -34,6 +34,8 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     @EntityGraph(attributePaths = "estudiante")
     List<Asistencia> findBySesionId(Long sesionId);
 
+    void deleteBySesionId(Long sesionId);
+
     @Query("select a.sesion.id as sesionId, count(a) as total from Asistencia a "
             + "where a.estado in :estados group by a.sesion.id")
     List<ConteoPorSesion> contarPorSesion(@Param("estados") Collection<EstadoAsistencia> estados);
