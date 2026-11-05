@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Curso, CursoService } from '../sesiones/curso.service';
 import { ImportacionResultado, ImportarEstudiantesService } from './importar-estudiantes.service';
 
@@ -13,7 +14,7 @@ const PLANTILLA_CSV =
 
 @Component({
   selector: 'app-importar-estudiantes',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   template: `
     <section class="importar">
       <header class="encabezado">
@@ -45,6 +46,7 @@ const PLANTILLA_CSV =
               <option [ngValue]="curso.id">{{ curso.nombre }} ({{ curso.grupo }})</option>
             }
           </select>
+          <a class="enlace-crear-grupo" routerLink="/panel/grupos">¿No existe el grupo? Créalo</a>
         </label>
 
         <div class="campo-archivo">
@@ -182,6 +184,16 @@ const PLANTILLA_CSV =
       background: var(--color-superficie);
       color: var(--color-texto);
       font: inherit;
+    }
+    .enlace-crear-grupo {
+      justify-self: start;
+      color: var(--color-primario);
+      font-weight: 600;
+      font-size: var(--texto-xs);
+      text-decoration: none;
+    }
+    .enlace-crear-grupo:hover {
+      text-decoration: underline;
     }
     .campo-archivo {
       display: grid;

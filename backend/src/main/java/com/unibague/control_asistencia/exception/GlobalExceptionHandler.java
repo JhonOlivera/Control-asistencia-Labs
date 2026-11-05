@@ -46,6 +46,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(ConflictoCursoException.class)
+    public ResponseEntity<ErrorResponse> handleConflictoCurso(ConflictoCursoException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ex.getMessage()));
+    }
+
     @ExceptionHandler(ValidacionImportacionException.class)
     public ResponseEntity<ErrorResponse> handleValidacionImportacion(ValidacionImportacionException ex) {
         return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
