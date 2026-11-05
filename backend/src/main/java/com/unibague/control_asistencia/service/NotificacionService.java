@@ -29,6 +29,7 @@ public class NotificacionService {
     private final EstudianteRepository estudianteRepository;
     private final TokenAsistenciaRepository tokenAsistenciaRepository;
     private final JavaMailSender mailSender;
+    private final BrevoEmailService brevoEmailService;
     private final String frontendUrl;
     private final String remitente;
     private final long expiracionMinutos;
@@ -38,6 +39,7 @@ public class NotificacionService {
             EstudianteRepository estudianteRepository,
             TokenAsistenciaRepository tokenAsistenciaRepository,
             JavaMailSender mailSender,
+            BrevoEmailService brevoEmailService,
             @Value("${app.frontend-url}") String frontendUrl,
             @Value("${spring.mail.username}") String remitente,
             @Value("${app.token.expiracion-minutos}") long expiracionMinutos
@@ -46,6 +48,7 @@ public class NotificacionService {
         this.estudianteRepository = estudianteRepository;
         this.tokenAsistenciaRepository = tokenAsistenciaRepository;
         this.mailSender = mailSender;
+        this.brevoEmailService = brevoEmailService;
         this.frontendUrl = frontendUrl;
         this.remitente = remitente;
         this.expiracionMinutos = expiracionMinutos;
@@ -71,20 +74,32 @@ public class NotificacionService {
             tokenAsistenciaRepository.save(token);
 
             String enlace = frontendUrl + "/asistencia/confirmar?token=" + token.getToken();
-            SimpleMailMessage mensaje = new SimpleMailMessage();
-            mensaje.setFrom(remitente);
-            mensaje.setTo(estudiante.getCorreo());
-            mensaje.setSubject("Enlace para registrar asistencia");
-            mensaje.setText("Hola " + estudiante.getNombre() + ",\n\n"
+            String asunto = "Enlace para registrar asistencia";
+            String cuerpo = "Hola " + estudiante.getNombre() + ",\n\n"
                     + "Laboratorio: " + sesion.getLaboratorio().getNombre() + "\n"
                     + "Fecha y hora: " + fechaHoraSesion + "\n\n"
-                    + "Registra tu asistencia en el siguiente enlace:\n" + enlace);
+                    + "Registra tu asistencia en el siguiente enlace:\n" + enlace;
 
-            try {
-                mailSender.send(mensaje);
-            } catch (MailException ex) {
-                logger.error("No se pudo enviar el enlace de asistencia al estudiante {} para la sesión {}",
-                        estudiante.getId(), sesionId, ex);
+            if (brevoEmailService.estaConfigurado()) {
+                try {
+                    brevoEmailService.enviar(estudiante.getCorreo(), estudiante.getNombre(), asunto, cuerpo);
+                } catch (Exception ex) {
+                    logger.error("No se pudo enviar el enlace de asistencia (Brevo) al estudiante {} para la sesión {}",
+                            estudiante.getId(), sesionId, ex);
+                }
+            } else {
+                SimpleMailMessage mensaje = new SimpleMailMessage();
+                mensaje.setFrom(remitente);
+                mensaje.setTo(estudiante.getCorreo());
+                mensaje.setSubject(asunto);
+                mensaje.setText(cuerpo);
+
+                try {
+                    mailSender.send(mensaje);
+                } catch (MailException ex) {
+                    logger.error("No se pudo enviar el enlace de asistencia al estudiante {} para la sesión {}",
+                            estudiante.getId(), sesionId, ex);
+                }
             }
         }
     }
