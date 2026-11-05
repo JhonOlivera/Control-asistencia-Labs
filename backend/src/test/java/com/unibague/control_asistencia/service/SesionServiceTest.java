@@ -281,7 +281,7 @@ class SesionServiceTest {
         Sesion abiertaHoy = construirSesionConFecha(200L, FECHA_VALIDA, EstadoSesion.ABIERTA);
         Sesion cerradaHoy = construirSesionConFecha(201L, FECHA_VALIDA, EstadoSesion.CERRADA);
         Sesion abiertaOtroDia = construirSesionConFecha(202L, FECHA_VALIDA.plusDays(1), EstadoSesion.ABIERTA);
-        when(sesionRepository.findAllByOrderByFechaDescHoraDescIdDesc())
+        when(sesionRepository.findAllByOrderByFechaDescHoraAscIdAsc())
                 .thenReturn(List.of(abiertaHoy, cerradaHoy, abiertaOtroDia));
 
         List<SesionResumenDto> resultado = sesionService.listarSesiones("abierta", FECHA_VALIDA);

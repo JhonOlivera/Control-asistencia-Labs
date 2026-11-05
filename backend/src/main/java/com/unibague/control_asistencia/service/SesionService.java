@@ -103,7 +103,7 @@ public class SesionService {
                         AsistenciaRepository.ConteoPorSesion::getTotal
                 ));
 
-        return sesionRepository.findAllByOrderByFechaDescHoraDescIdDesc().stream()
+        return sesionRepository.findAllByOrderByFechaDescHoraAscIdAsc().stream()
                 .filter(sesion -> estado == null || sesion.getEstado() == estado)
                 .filter(sesion -> fechaFiltro == null || sesion.getFecha().equals(fechaFiltro))
                 .map(sesion -> new SesionResumenDto(

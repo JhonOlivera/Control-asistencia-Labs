@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, forkJoin, map, of } from 'rxjs';
@@ -49,15 +49,30 @@ type EstadoPestana = 'ABIERTA' | 'CERRADA';
             (ngModelChange)="onFechaChange($event)"
           />
         </label>
+        <label>
+          Curso
+          <select
+            name="cursoFiltro"
+            [ngModel]="cursoFiltro()"
+            (ngModelChange)="cambiarCursoFiltro($event)"
+          >
+            <option [ngValue]="null">Todos</option>
+            @for (curso of cursosDisponibles(); track curso.id) {
+              <option [ngValue]="curso.id">{{ curso.etiqueta }}</option>
+            }
+          </select>
+        </label>
         <button
           type="button"
           class="btn btn--secundario"
-          (click)="limpiarFecha()"
-          [disabled]="!fecha()"
+          (click)="limpiarFiltros()"
+          [disabled]="!fecha() && cursoFiltro() === null"
         >
-          Limpiar fecha
+          Limpiar filtros
         </button>
       </div>
+
+      <p class="contador">{{ sesionesFiltradas().length }} sesión(es)</p>
 
       @if (error(); as error) {
         <p class="mensaje-error" role="alert">{{ error }}</p>
@@ -78,7 +93,7 @@ type EstadoPestana = 'ABIERTA' | 'CERRADA';
       <div aria-live="polite">
         @if (cargando()) {
           <p class="cargando">Cargando sesiones...</p>
-        } @else if (sesiones().length === 0) {
+        } @else if (sesionesFiltradas().length === 0) {
           <p class="estado-vacio">
             No hay sesiones {{ pestanaActiva() === 'ABIERTA' ? 'activas' : 'inactivas' }}{{
               fecha() ? ' en esta fecha' : ''
@@ -102,7 +117,7 @@ type EstadoPestana = 'ABIERTA' | 'CERRADA';
                 </tr>
               </thead>
               <tbody>
-                @for (sesion of sesiones(); track sesion.id) {
+                @for (sesion of sesionesPagina(); track sesion.id) {
                   <tr
                     tabindex="0"
                     role="link"
@@ -124,8 +139,8 @@ type EstadoPestana = 'ABIERTA' | 'CERRADA';
                       {{ sesion.cursoNombre }} ({{ sesion.cursoGrupo }})
                     </td>
                     <td data-label="Laboratorio">{{ sesion.laboratorioNombre }}</td>
-                    <td data-label="Fecha">{{ sesion.fecha }}</td>
-                    <td data-label="Hora">{{ sesion.hora }}</td>
+                    <td data-label="Fecha" class="col-fecha">{{ formatearFecha(sesion.fecha) }}</td>
+                    <td data-label="Hora">{{ formatearHora(sesion.hora) }}</td>
                     <td data-label="Estado">
                       <span [class]="claseBadge(sesion.estado)">{{ sesion.estado }}</span>
                     </td>
@@ -152,6 +167,40 @@ type EstadoPestana = 'ABIERTA' | 'CERRADA';
                 }
               </tbody>
             </table>
+          </div>
+
+          <div class="paginacion">
+            <label>
+              Mostrar
+              <select
+                name="tamanioPagina"
+                [ngModel]="tamanioPagina()"
+                (ngModelChange)="cambiarTamanioPagina($event)"
+              >
+                <option [ngValue]="10">10</option>
+                <option [ngValue]="25">25</option>
+                <option [ngValue]="50">50</option>
+              </select>
+            </label>
+            <div class="paginacion-controles">
+              <button
+                type="button"
+                class="btn btn--secundario btn--chico"
+                (click)="irPaginaAnterior()"
+                [disabled]="paginaActual() <= 1"
+              >
+                Anterior
+              </button>
+              <span>Página {{ paginaActual() }} de {{ totalPaginas() }}</span>
+              <button
+                type="button"
+                class="btn btn--secundario btn--chico"
+                (click)="irPaginaSiguiente()"
+                [disabled]="paginaActual() >= totalPaginas()"
+              >
+                Siguiente
+              </button>
+            </div>
           </div>
         }
       </div>
@@ -263,6 +312,44 @@ type EstadoPestana = 'ABIERTA' | 'CERRADA';
       height: 18px;
       accent-color: var(--color-primario);
     }
+    .col-fecha {
+      white-space: nowrap;
+    }
+    .contador {
+      margin: 0;
+      color: var(--color-texto-suave);
+      font-size: var(--texto-sm);
+    }
+    .paginacion {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--espacio-3);
+      margin-top: var(--espacio-4);
+    }
+    .paginacion label {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: var(--espacio-2);
+    }
+    .paginacion select {
+      min-height: 32px;
+      padding: 0 var(--espacio-2);
+      border: 1px solid var(--color-borde);
+      border-radius: var(--radio-sm);
+      background: var(--color-superficie);
+      color: var(--color-texto);
+      font: inherit;
+    }
+    .paginacion-controles {
+      display: flex;
+      align-items: center;
+      gap: var(--espacio-3);
+      color: var(--color-texto-suave);
+      font-size: var(--texto-sm);
+    }
     .barra-seleccion {
       display: flex;
       flex-wrap: wrap;
@@ -295,6 +382,13 @@ type EstadoPestana = 'ABIERTA' | 'CERRADA';
       .barra-seleccion .btn {
         width: 100%;
       }
+      .paginacion {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .paginacion-controles {
+        justify-content: space-between;
+      }
     }
   `,
 })
@@ -305,12 +399,44 @@ export class SesionesListaComponent implements OnInit, OnDestroy {
 
   pestanaActiva = signal<EstadoPestana>('ABIERTA');
   fecha = signal('');
-  sesiones = signal<SesionResumen[]>([]);
+  cursoFiltro = signal<number | null>(null);
+  sesionesCargadas = signal<SesionResumen[]>([]);
   cargando = signal(true);
   error = signal<string | null>(null);
   mensaje = signal<string | null>(null);
 
+  paginaActual = signal(1);
+  tamanioPagina = signal(10);
+
   seleccionadas = signal<Set<number>>(new Set());
+
+  cursosDisponibles = computed(() => {
+    const mapa = new Map<number, string>();
+    for (const sesion of this.sesionesCargadas()) {
+      if (!mapa.has(sesion.cursoId)) {
+        mapa.set(sesion.cursoId, `${sesion.cursoNombre} (${sesion.cursoGrupo})`);
+      }
+    }
+    return [...mapa.entries()]
+      .map(([id, etiqueta]) => ({ id, etiqueta }))
+      .sort((a, b) => a.etiqueta.localeCompare(b.etiqueta));
+  });
+
+  sesionesFiltradas = computed(() => {
+    const cursoId = this.cursoFiltro();
+    return cursoId === null
+      ? this.sesionesCargadas()
+      : this.sesionesCargadas().filter((sesion) => sesion.cursoId === cursoId);
+  });
+
+  totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.sesionesFiltradas().length / this.tamanioPagina())),
+  );
+
+  sesionesPagina = computed(() => {
+    const inicio = (this.paginaActual() - 1) * this.tamanioPagina();
+    return this.sesionesFiltradas().slice(inicio, inicio + this.tamanioPagina());
+  });
 
   sesionAEliminar = signal<SesionResumen | null>(null);
   detalleEliminacion = signal<string[]>([]);
@@ -352,24 +478,48 @@ export class SesionesListaComponent implements OnInit, OnDestroy {
     this.debounceTimer = setTimeout(() => this.cargar(), 300);
   }
 
-  limpiarFecha(): void {
-    if (!this.fecha()) {
+  limpiarFiltros(): void {
+    if (!this.fecha() && this.cursoFiltro() === null) {
       return;
     }
     this.fecha.set('');
+    this.cursoFiltro.set(null);
     this.cargar();
+  }
+
+  cambiarCursoFiltro(valor: number | null): void {
+    this.cursoFiltro.set(valor);
+    this.paginaActual.set(1);
+  }
+
+  cambiarTamanioPagina(valor: number): void {
+    this.tamanioPagina.set(valor);
+    this.paginaActual.set(1);
+  }
+
+  irPaginaAnterior(): void {
+    if (this.paginaActual() > 1) {
+      this.paginaActual.set(this.paginaActual() - 1);
+    }
+  }
+
+  irPaginaSiguiente(): void {
+    if (this.paginaActual() < this.totalPaginas()) {
+      this.paginaActual.set(this.paginaActual() + 1);
+    }
   }
 
   cargar(): void {
     this.cargando.set(true);
     this.error.set(null);
     this.seleccionadas.set(new Set());
+    this.paginaActual.set(1);
 
     this.sesionesService
       .listarSesiones({ estado: this.pestanaActiva(), fecha: this.fecha() || undefined })
       .subscribe({
         next: (sesiones) => {
-          this.sesiones.set([...sesiones].sort((a, b) => a.hora.localeCompare(b.hora)));
+          this.sesionesCargadas.set(this.ordenarPorFechaYHora(sesiones));
           this.cargando.set(false);
         },
         error: (error: unknown) => {
@@ -377,6 +527,24 @@ export class SesionesListaComponent implements OnInit, OnDestroy {
           this.cargando.set(false);
         },
       });
+  }
+
+  private ordenarPorFechaYHora(sesiones: SesionResumen[]): SesionResumen[] {
+    return [...sesiones].sort((a, b) => {
+      if (a.fecha !== b.fecha) {
+        return b.fecha.localeCompare(a.fecha);
+      }
+      return a.hora.localeCompare(b.hora);
+    });
+  }
+
+  formatearFecha(fecha: string): string {
+    const [anio, mes, dia] = fecha.split('-');
+    return `${dia}/${mes}/${anio}`;
+  }
+
+  formatearHora(hora: string): string {
+    return hora.slice(0, 5);
   }
 
   nuevaSesion(): void {
@@ -483,7 +651,9 @@ export class SesionesListaComponent implements OnInit, OnDestroy {
   }
 
   confirmarEliminarLote(): void {
-    const seleccionadas = this.sesiones().filter((sesion) => this.seleccionadas().has(sesion.id));
+    const seleccionadas = this.sesionesCargadas().filter((sesion) =>
+      this.seleccionadas().has(sesion.id),
+    );
     if (seleccionadas.length === 0) {
       this.mostrarConfirmacionLote.set(false);
       return;
