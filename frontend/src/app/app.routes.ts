@@ -67,6 +67,11 @@ export const routes: Routes = [
 					),
 			},
 			{
+				path: 'grupos',
+				loadComponent: () =>
+					import('./grupos/grupos.component').then((module) => module.GruposComponent),
+			},
+			{
 				path: 'horarios',
 				loadComponent: () =>
 					import('./horarios/horarios.component').then((module) => module.HorariosComponent),
