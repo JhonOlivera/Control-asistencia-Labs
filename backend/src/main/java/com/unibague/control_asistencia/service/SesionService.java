@@ -9,6 +9,7 @@ import com.unibague.control_asistencia.dto.SesionPorFechaDto;
 import com.unibague.control_asistencia.dto.SesionRequestDto;
 import com.unibague.control_asistencia.dto.SesionResponseDto;
 import com.unibague.control_asistencia.dto.SesionResumenDto;
+import com.unibague.control_asistencia.exception.ConflictoSesionException;
 import com.unibague.control_asistencia.exception.ResourceNotFoundException;
 import com.unibague.control_asistencia.exception.ValidacionSesionException;
 import com.unibague.control_asistencia.model.Administrador;
@@ -26,6 +27,7 @@ import com.unibague.control_asistencia.repository.CursoRepository;
 import com.unibague.control_asistencia.repository.EstudianteRepository;
 import com.unibague.control_asistencia.repository.LaboratorioRepository;
 import com.unibague.control_asistencia.repository.SesionRepository;
+import com.unibague.control_asistencia.repository.TokenAsistenciaRepository;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -71,19 +73,22 @@ public class SesionService {
     private final AdministradorRepository administradorRepository;
     private final AsistenciaRepository asistenciaRepository;
     private final EstudianteRepository estudianteRepository;
+    private final TokenAsistenciaRepository tokenAsistenciaRepository;
 
     public SesionService(SesionRepository sesionRepository,
                         LaboratorioRepository laboratorioRepository,
                         CursoRepository cursoRepository,
                         AdministradorRepository administradorRepository,
                         AsistenciaRepository asistenciaRepository,
-                        EstudianteRepository estudianteRepository) {
+                        EstudianteRepository estudianteRepository,
+                        TokenAsistenciaRepository tokenAsistenciaRepository) {
         this.sesionRepository = sesionRepository;
         this.laboratorioRepository = laboratorioRepository;
         this.cursoRepository = cursoRepository;
         this.administradorRepository = administradorRepository;
         this.asistenciaRepository = asistenciaRepository;
         this.estudianteRepository = estudianteRepository;
+        this.tokenAsistenciaRepository = tokenAsistenciaRepository;
     }
 
     @Transactional(readOnly = true)
@@ -98,7 +103,7 @@ public class SesionService {
                         AsistenciaRepository.ConteoPorSesion::getTotal
                 ));
 
-        return sesionRepository.findAllByOrderByFechaDescHoraDescIdDesc().stream()
+        return sesionRepository.findAllByOrderByFechaDescHoraAscIdAsc().stream()
                 .filter(sesion -> estado == null || sesion.getEstado() == estado)
                 .filter(sesion -> fechaFiltro == null || sesion.getFecha().equals(fechaFiltro))
                 .map(sesion -> new SesionResumenDto(
@@ -314,6 +319,20 @@ public class SesionService {
         Sesion actualizada = sesionRepository.save(sesion);
         registrarAusentes(actualizada);
         return mapToResponse(actualizada);
+    }
+
+    @Transactional
+    public void eliminarSesion(Long id) {
+        Sesion sesion = sesionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Sesión no encontrada con id " + id));
+
+        if (sesion.getEstado() == EstadoSesion.ABIERTA) {
+            throw new ConflictoSesionException("Cierra la sesión antes de eliminarla");
+        }
+
+        tokenAsistenciaRepository.deleteBySesionId(id);
+        asistenciaRepository.deleteBySesionId(id);
+        sesionRepository.delete(sesion);
     }
 
     private void registrarAusentes(Sesion sesion) {

@@ -163,4 +163,8 @@ export class SesionesService {
   cerrarSesion(sesionId: number): Observable<SesionResponse> {
     return this.http.patch<SesionResponse>(`${apiUrl}/sesiones/${sesionId}/cerrar`, {});
   }
+
+  eliminarSesion(sesionId: number): Observable<void> {
+    return this.http.delete<void>(`${apiUrl}/sesiones/${sesionId}`);
+  }
 }

@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TokenAsistenciaRepository extends JpaRepository<TokenAsistencia, Long> {
     Optional<TokenAsistencia> findByToken(String token);
+
+    void deleteBySesionId(Long sesionId);
 }

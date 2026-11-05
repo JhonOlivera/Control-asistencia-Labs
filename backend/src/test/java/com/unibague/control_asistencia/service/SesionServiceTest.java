@@ -3,6 +3,8 @@ package com.unibague.control_asistencia.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.unibague.control_asistencia.dto.ExportacionCsvDto;
@@ -11,6 +13,7 @@ import com.unibague.control_asistencia.dto.SesionParticipantesResponseDto;
 import com.unibague.control_asistencia.dto.SesionPorFechaDto;
 import com.unibague.control_asistencia.dto.SesionRequestDto;
 import com.unibague.control_asistencia.dto.SesionResumenDto;
+import com.unibague.control_asistencia.exception.ConflictoSesionException;
 import com.unibague.control_asistencia.exception.ResourceNotFoundException;
 import com.unibague.control_asistencia.exception.ValidacionSesionException;
 import com.unibague.control_asistencia.model.Administrador;
@@ -28,6 +31,7 @@ import com.unibague.control_asistencia.repository.CursoRepository;
 import com.unibague.control_asistencia.repository.EstudianteRepository;
 import com.unibague.control_asistencia.repository.LaboratorioRepository;
 import com.unibague.control_asistencia.repository.SesionRepository;
+import com.unibague.control_asistencia.repository.TokenAsistenciaRepository;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -60,6 +64,8 @@ class SesionServiceTest {
     private AsistenciaRepository asistenciaRepository;
     @Mock
     private EstudianteRepository estudianteRepository;
+    @Mock
+    private TokenAsistenciaRepository tokenAsistenciaRepository;
 
     private SesionService sesionService;
 
@@ -75,7 +81,8 @@ class SesionServiceTest {
                 cursoRepository,
                 administradorRepository,
                 asistenciaRepository,
-                estudianteRepository
+                estudianteRepository,
+                tokenAsistenciaRepository
         );
 
         curso = new Curso();
@@ -274,7 +281,7 @@ class SesionServiceTest {
         Sesion abiertaHoy = construirSesionConFecha(200L, FECHA_VALIDA, EstadoSesion.ABIERTA);
         Sesion cerradaHoy = construirSesionConFecha(201L, FECHA_VALIDA, EstadoSesion.CERRADA);
         Sesion abiertaOtroDia = construirSesionConFecha(202L, FECHA_VALIDA.plusDays(1), EstadoSesion.ABIERTA);
-        when(sesionRepository.findAllByOrderByFechaDescHoraDescIdDesc())
+        when(sesionRepository.findAllByOrderByFechaDescHoraAscIdAsc())
                 .thenReturn(List.of(abiertaHoy, cerradaHoy, abiertaOtroDia));
 
         List<SesionResumenDto> resultado = sesionService.listarSesiones("abierta", FECHA_VALIDA);
@@ -286,6 +293,40 @@ class SesionServiceTest {
     void listarSesiones_debeLanzarExcepcionConEstadoInvalido() {
         assertThatThrownBy(() -> sesionService.listarSesiones("no-existe", null))
                 .isInstanceOf(ValidacionSesionException.class);
+    }
+
+    @Test
+    void eliminarSesion_debeEliminarAsistenciasYTokensCuandoLaSesionEstaCerrada() {
+        Sesion sesion = construirSesion(300L, HORA_VALIDA, EstadoSesion.CERRADA);
+        when(sesionRepository.findById(sesion.getId())).thenReturn(Optional.of(sesion));
+
+        sesionService.eliminarSesion(sesion.getId());
+
+        verify(tokenAsistenciaRepository).deleteBySesionId(sesion.getId());
+        verify(asistenciaRepository).deleteBySesionId(sesion.getId());
+        verify(sesionRepository).delete(sesion);
+    }
+
+    @Test
+    void eliminarSesion_debeRechazarUnaSesionAbierta() {
+        Sesion sesion = construirSesion(301L, HORA_VALIDA, EstadoSesion.ABIERTA);
+        when(sesionRepository.findById(sesion.getId())).thenReturn(Optional.of(sesion));
+
+        assertThatThrownBy(() -> sesionService.eliminarSesion(sesion.getId()))
+                .isInstanceOf(ConflictoSesionException.class)
+                .hasMessage("Cierra la sesión antes de eliminarla");
+
+        verify(sesionRepository, never()).delete(any());
+        verify(asistenciaRepository, never()).deleteBySesionId(any());
+        verify(tokenAsistenciaRepository, never()).deleteBySesionId(any());
+    }
+
+    @Test
+    void eliminarSesion_debeLanzarExcepcionCuandoNoExiste() {
+        when(sesionRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sesionService.eliminarSesion(99L))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     private Sesion construirSesion(Long id, LocalTime hora, EstadoSesion estadoSesion) {
