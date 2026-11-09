@@ -3,6 +3,7 @@ import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, catchError, distinctUntilChanged, finalize, map, switchMap, tap } from 'rxjs';
+import { formatearEncabezadoFechaHora } from '../core/fecha.utils';
 import {
   EstadoAsistencia,
   HistorialEstudiante,
@@ -79,7 +80,9 @@ import {
                 <tbody>
                   @for (sesion of historial.sesiones; track sesion.sesionId) {
                     <tr>
-                      <td data-label="Fecha">{{ sesion.fecha }} {{ sesion.hora }}</td>
+                      <td data-label="Fecha">
+                        {{ formatearEncabezadoFechaHora(sesion.fecha, sesion.hora) }}
+                      </td>
                       <td data-label="Curso">{{ sesion.curso }}</td>
                       <td data-label="Laboratorio">{{ sesion.laboratorio }}</td>
                       <td data-label="Estado">
@@ -189,6 +192,8 @@ import {
   `,
 })
 export class HistorialEstudianteComponent implements OnInit {
+  protected readonly formatearEncabezadoFechaHora = formatearEncabezadoFechaHora;
+
   private readonly route = inject(ActivatedRoute);
   private readonly historialService = inject(HistorialService);
   private readonly destroyRef = inject(DestroyRef);

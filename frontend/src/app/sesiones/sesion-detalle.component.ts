@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { interval, startWith, switchMap, takeWhile } from 'rxjs';
+import { formatearEncabezadoFechaHora, formatearFechaHoraCorta } from '../core/fecha.utils';
 import { AsistenciaEstudiante, SesionResumen, SesionesService } from './sesiones.service';
 
 const INTERVALO_ACTUALIZACION_MS = 10_000;
@@ -25,7 +26,7 @@ const INTERVALO_ACTUALIZACION_MS = 10_000;
           <div>
             <h1>{{ sesion.cursoNombre }} ({{ sesion.cursoGrupo }})</h1>
             <p class="subtitulo">
-              {{ sesion.laboratorioNombre }} · {{ sesion.fecha }} {{ sesion.hora }} ·
+              {{ sesion.laboratorioNombre }} · {{ encabezadoFechaHora(sesion) }} ·
               {{ sesion.tema }}
             </p>
           </div>
@@ -85,7 +86,9 @@ const INTERVALO_ACTUALIZACION_MS = 10_000;
                   <td data-label="Estado">
                     <span [class]="claseBadge(asistencia.estado)">{{ asistencia.estado }}</span>
                   </td>
-                  <td data-label="Hora de registro">{{ asistencia.horaRegistro ?? '—' }}</td>
+                  <td data-label="Hora de registro">
+                    {{ horaRegistroFormateada(asistencia.horaRegistro) }}
+                  </td>
                 </tr>
               }
             </tbody>
@@ -235,6 +238,14 @@ export class SesionDetalleComponent implements OnInit {
 
   claseBadge(estado: string): string {
     return `badge-estado badge-estado--${estado.toLowerCase()}`;
+  }
+
+  encabezadoFechaHora(sesion: SesionResumen): string {
+    return formatearEncabezadoFechaHora(sesion.fecha, sesion.hora);
+  }
+
+  horaRegistroFormateada(horaRegistro: string | null): string {
+    return formatearFechaHoraCorta(horaRegistro);
   }
 
   volver(): void {

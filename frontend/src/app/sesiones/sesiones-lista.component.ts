@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, forkJoin, map, of } from 'rxjs';
+import { formatearEncabezadoFechaHora, formatearFechaCorta, formatearHoraCorta } from '../core/fecha.utils';
 import { ConfirmacionDialogComponent } from './confirmacion-dialog.component';
 import { SesionResumen, SesionesService } from './sesiones.service';
 
@@ -539,12 +540,11 @@ export class SesionesListaComponent implements OnInit, OnDestroy {
   }
 
   formatearFecha(fecha: string): string {
-    const [anio, mes, dia] = fecha.split('-');
-    return `${dia}/${mes}/${anio}`;
+    return formatearFechaCorta(fecha);
   }
 
   formatearHora(hora: string): string {
-    return hora.slice(0, 5);
+    return formatearHoraCorta(hora);
   }
 
   nuevaSesion(): void {
@@ -588,7 +588,7 @@ export class SesionesListaComponent implements OnInit, OnDestroy {
     this.detalleEliminacion.set([
       `Curso: ${sesion.cursoNombre} (${sesion.cursoGrupo})`,
       `Laboratorio: ${sesion.laboratorioNombre}`,
-      `Fecha: ${sesion.fecha} ${sesion.hora}`,
+      `Fecha: ${formatearEncabezadoFechaHora(sesion.fecha, sesion.hora)}`,
       `Asistencias registradas (presentes y tarde): ${sesion.estudiantesMarcados}`,
     ]);
 
@@ -600,7 +600,7 @@ export class SesionesListaComponent implements OnInit, OnDestroy {
         this.detalleEliminacion.set([
           `Curso: ${sesion.cursoNombre} (${sesion.cursoGrupo})`,
           `Laboratorio: ${sesion.laboratorioNombre}`,
-          `Fecha: ${sesion.fecha} ${sesion.hora}`,
+          `Fecha: ${formatearEncabezadoFechaHora(sesion.fecha, sesion.hora)}`,
           `Asistencias que se borrarán: ${datos.resumen.presentes} presentes, ${datos.resumen.tarde} tarde.`,
         ]);
       },
