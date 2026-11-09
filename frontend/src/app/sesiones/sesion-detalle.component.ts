@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { interval, startWith, switchMap, takeWhile } from 'rxjs';
 import { AsistenciaEstudiante, SesionResumen, SesionesService } from './sesiones.service';
 
@@ -10,6 +10,12 @@ const INTERVALO_ACTUALIZACION_MS = 10_000;
   selector: 'app-sesion-detalle',
   template: `
     <section class="sesion-detalle">
+      <div class="volver">
+        <button type="button" class="btn btn--secundario" (click)="volver()">
+          ← Volver a sesiones
+        </button>
+      </div>
+
       @if (error(); as error) {
         <p class="mensaje-error" role="alert">{{ error }}</p>
       }
@@ -138,10 +144,13 @@ const INTERVALO_ACTUALIZACION_MS = 10_000;
 })
 export class SesionDetalleComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly sesionesService = inject(SesionesService);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly sesionId = Number(this.route.snapshot.paramMap.get('id'));
+  private readonly estadoRetorno = this.route.snapshot.queryParamMap.get('estado');
+  private readonly fechaRetorno = this.route.snapshot.queryParamMap.get('fecha');
 
   sesion = signal<SesionResumen | null>(null);
   asistencias = signal<AsistenciaEstudiante[]>([]);
@@ -226,6 +235,12 @@ export class SesionDetalleComponent implements OnInit {
 
   claseBadge(estado: string): string {
     return `badge-estado badge-estado--${estado.toLowerCase()}`;
+  }
+
+  volver(): void {
+    this.router.navigate(['/panel/sesiones'], {
+      queryParams: { estado: this.estadoRetorno, fecha: this.fechaRetorno },
+    });
   }
 
   private cargarSesion(): void {
