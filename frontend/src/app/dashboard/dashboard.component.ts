@@ -3,6 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SesionPorFecha, SesionesService } from '../sesiones/sesiones.service';
+import { formatearHoraCorta } from '../core/fecha.utils';
 import { ReportesService, ResumenReporte } from './reportes.service';
 
 function fechaLocalHoy(): string {
@@ -127,7 +128,7 @@ function fechaLocalHoy(): string {
                     >
                       <td data-label="Laboratorio">{{ sesion.laboratorioNombre }}</td>
                       <td data-label="Curso">{{ sesion.cursoNombre }} ({{ sesion.cursoGrupo }})</td>
-                      <td data-label="Hora">{{ sesion.horaInicio.slice(0, 5) }}</td>
+                      <td data-label="Hora">{{ formatearHoraCorta(sesion.horaInicio) }}</td>
                       <td data-label="Estado">
                         <span [class]="claseBadge(sesion.estado)">{{ sesion.estado }}</span>
                       </td>
@@ -221,6 +222,8 @@ function fechaLocalHoy(): string {
   `,
 })
 export class DashboardComponent implements OnInit {
+  protected readonly formatearHoraCorta = formatearHoraCorta;
+
   private readonly reportesService = inject(ReportesService);
   private readonly sesionesService = inject(SesionesService);
   private readonly router = inject(Router);

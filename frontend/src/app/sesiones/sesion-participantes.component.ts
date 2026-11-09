@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { formatearEncabezadoFechaHora, formatearFechaHoraCorta } from '../core/fecha.utils';
 import { SesionParticipantesResponse, SesionesService } from './sesiones.service';
 
 type FiltroAsistencia = 'TODOS' | 'PRESENTE' | 'TARDE' | 'AUSENTE';
@@ -29,7 +30,7 @@ type FiltroMatricula = 'TODOS' | 'ACTIVA' | 'INACTIVA';
           <div>
             <h1>{{ datos.cursoNombre }} ({{ datos.cursoGrupo }})</h1>
             <p class="subtitulo">
-              {{ datos.laboratorioNombre }} · {{ datos.fecha }} · {{ datos.horaInicio.slice(0, 5) }}
+              {{ datos.laboratorioNombre }} · {{ encabezadoFechaHora(datos) }}
             </p>
           </div>
           <span [class]="claseBadgeEstado(datos.estado)">{{ datos.estado }}</span>
@@ -331,7 +332,11 @@ export class SesionParticipantesComponent implements OnInit {
   }
 
   horaRegistroCorta(horaRegistro: string | null): string {
-    return horaRegistro ? horaRegistro.slice(11, 16) : '—';
+    return formatearFechaHoraCorta(horaRegistro);
+  }
+
+  encabezadoFechaHora(datos: SesionParticipantesResponse): string {
+    return formatearEncabezadoFechaHora(datos.fecha, datos.horaInicio);
   }
 
   private extraerNombreArchivo(encabezado: string | null, nombrePorDefecto: string): string {
