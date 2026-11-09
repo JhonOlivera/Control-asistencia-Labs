@@ -25,6 +25,7 @@ interface ItemMenu {
 const ITEMS_MENU: ItemMenu[] = [
   { etiqueta: 'Inicio', ruta: '/panel' },
   { etiqueta: 'Sesiones', ruta: '/panel/sesiones' },
+  { etiqueta: 'Grupos', ruta: '/panel/grupos' },
   { etiqueta: 'Laboratorios', ruta: '/panel/laboratorios' },
   { etiqueta: 'Horarios', ruta: '/panel/horarios' },
   { etiqueta: 'Estudiantes', ruta: '/panel/estudiantes' },

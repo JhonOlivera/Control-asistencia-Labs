@@ -14,4 +14,6 @@ public interface HorarioGrupoRepository extends JpaRepository<HorarioGrupo, Long
     List<HorarioGrupo> findByCursoIdAndActivoTrue(Long cursoId);
 
     List<HorarioGrupo> findByLaboratorioIdAndDiaSemanaAndActivoTrue(Long laboratorioId, DayOfWeek diaSemana);
+
+    boolean existsByCursoId(Long cursoId);
 }

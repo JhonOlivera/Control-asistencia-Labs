@@ -14,6 +14,8 @@ public interface SesionRepository extends JpaRepository<Sesion, Long> {
 
     boolean existsByLaboratorioIdAndFechaAndHoraAndEstado(Long laboratorioId, LocalDate fecha, LocalTime hora, EstadoSesion estado);
 
+    boolean existsByCursoId(Long cursoId);
+
     @Query("select s.curso.id as cursoId, count(s) as total from Sesion s where s.estado = :estado group by s.curso.id")
     List<ConteoPorCurso> contarPorCursoYEstado(@Param("estado") EstadoSesion estado);
 
