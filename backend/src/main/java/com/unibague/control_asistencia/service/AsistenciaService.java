@@ -50,6 +50,9 @@ public class AsistenciaService {
         }
 
         var estudiante = token.getEstudiante();
+        if (!estudiante.isActivo()) {
+            throw new ValidacionAsistenciaException("No se puede registrar asistencia porque el estudiante no está activo.");
+        }
         if (asistenciaRepository.existsByEstudianteIdAndSesionId(estudiante.getId(), sesion.getId())) {
             throw new ValidacionAsistenciaException("La asistencia de este estudiante ya fue registrada para la sesión.");
         }
