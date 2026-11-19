@@ -14,14 +14,20 @@ El acceso es **solo con Google** y **solo para correos previamente registrados**
 
 > **Arranque en frío:** el backend corre en el plan gratuito de Render y se duerme tras un rato sin uso. La primera petición después de dormirse puede tardar hasta ~90 segundos en responder.
 
+## Cómo probar la aplicación
+
+- El acceso es **solo con Google** y **solo con correos registrados previamente** como Administrador o Docente.
+- Para evaluar la aplicación, el equipo registra el correo de quien lo necesite.
+- El primer ingreso puede tardar ~90 segundos por el arranque en frío del backend en Render.
+
 ## Funcionalidades implementadas
 
 | HU | Historia de usuario |
 |----|----------------------|
 | HU01 | El estudiante registra su asistencia desde el enlace que recibe por correo, sin iniciar sesión (se marca como *presente* o *tarde* según la tolerancia configurada). |
-| HU02 | Consultar el historial de asistencia: por estudiante y por participantes de una sesión. |
+| HU02 | Consultar el historial de asistencia: por estudiante, por participantes de una sesión, y qué sesiones hubo y quién asistió en una fecha. |
 | HU03 | Registrar, listar (con filtro por curso, orden y paginación), cerrar y eliminar sesiones de laboratorio. |
-| HU04 | Generar reportes y estadísticas de asistencia, con exportación a CSV. |
+| HU04 | Generar reportes y estadísticas de asistencia, y descargar en CSV la lista de participantes de una sesión. |
 | HU05 | Gestionar estudiantes (alta, edición, activar/inactivar). |
 | HU09 | Configurar laboratorios: CRUD, horario disponible y capacidad, validados al crear una sesión. |
 | HU11 | Importar estudiantes de un curso desde un archivo CSV o Excel. |
@@ -180,6 +186,7 @@ npx ng test --include src/app/app.spec.ts        # un solo archivo
 - Los correos a cuentas `@estudiantesunibague.edu.co` pueden no llegar por filtrado de la propia universidad.
 - `Administrador` y `Docente` no tienen hoy una diferencia real de permisos: cualquiera de los dos accede a las mismas pantallas y endpoints.
 - El inicio de sesión con correo y contraseña está marcado como "Próximamente" en la pantalla de login; por ahora el único acceso es con Google.
+- El plan gratuito de MySQL en Aiven se retira el 21 de diciembre de 2026; después de esa fecha la base de datos debe migrarse a otro plan o proveedor.
 
 ## Equipo
 
